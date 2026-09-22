@@ -719,6 +719,22 @@ window.google={script:{get run(){return demoRunner();}}};
   .stock-step input:focus { outline:3px solid #c3def7; border-color:var(--navy); }
   .stock-step input:not(:placeholder-shown) { background:#eff8f3; }
   .stock-step input[aria-invalid=true] { border-color:var(--err); background:var(--err-bg); }
+  .stock-step input[readonly] { cursor:pointer; caret-color:transparent; }
+  .stock-keypad-overlay { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; background:#142b43a8; }
+  .stock-keypad-overlay[hidden] { display:none; }
+  .stock-keypad { width:min(100%,400px); max-height:calc(100dvh - 32px); overflow:auto; border-radius:18px; padding:20px; background:#fff; box-shadow:0 20px 60px #10243655; }
+  .stock-keypad-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .stock-keypad-head strong { font-size:21px; line-height:1.35; }
+  .stock-keypad-head button { border:0; background:transparent; font-size:29px; min-width:44px; min-height:44px; color:var(--navy); }
+  .stock-keypad-meta { color:var(--text-2); font-size:15px; margin-top:4px; }
+  .stock-keypad-value { display:block; margin:12px 0; padding:8px 16px; min-height:72px; border:2px solid var(--navy); border-radius:12px; background:#f5fbff; text-align:right; font-size:38px; font-variant-numeric:tabular-nums; }
+  .stock-keypad-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stock-keypad-grid button { min-height:64px; border:1px solid var(--border-strong); border-radius:10px; background:#f7f9fb; color:var(--navy); font-size:27px; font-weight:700; }
+  .stock-keypad-actions { display:flex; gap:8px; margin-top:12px; }
+  .stock-keypad-actions button { flex:1; min-height:56px; border:1px solid var(--border-strong); border-radius:10px; background:white; color:var(--navy); font-size:17px; font-weight:700; }
+  .stock-keypad-actions button:last-child { background:var(--navy); color:white; }
+  .stock-keypad-actions button:disabled { opacity:.45; }
+  .stock-keypad button { touch-action:manipulation; }
   .stock-footer { position:sticky; bottom:0; background:var(--bg); padding:16px 0 4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
   .stock-confirm { width:100%; display:flex; align-items:center; gap:12px; min-height:48px; font-size:16px; cursor:pointer; }
   .stock-confirm[hidden] { display:none; }
@@ -789,8 +805,68 @@ window.google={script:{get run(){return demoRunner();}}};
     <button class="stock-action" onclick="downloadStockDraft()">入力の控えをダウンロード</button>
   </div>
 </div>
+<div class="stock-keypad-overlay" id="stock-keypad-overlay" hidden onclick="if(event.target===this)closeStockKeypad()">
+  <div class="stock-keypad" role="dialog" aria-modal="true" aria-labelledby="stock-keypad-title">
+    <div class="stock-keypad-head"><div><strong id="stock-keypad-title"></strong><div class="stock-keypad-meta" id="stock-keypad-meta"></div></div><button aria-label="数字入力を閉じる" onclick="closeStockKeypad()">×</button></div>
+    <output class="stock-keypad-value" id="stock-keypad-value" aria-live="polite"></output>
+    <div class="stock-keypad-grid">
+      <button onclick="stockKeypadPress('1')">1</button><button onclick="stockKeypadPress('2')">2</button><button onclick="stockKeypadPress('3')">3</button>
+      <button onclick="stockKeypadPress('4')">4</button><button onclick="stockKeypadPress('5')">5</button><button onclick="stockKeypadPress('6')">6</button>
+      <button onclick="stockKeypadPress('7')">7</button><button onclick="stockKeypadPress('8')">8</button><button onclick="stockKeypadPress('9')">9</button>
+      <button aria-label="数字を消去" onclick="stockKeypadPress('clear')">C</button><button onclick="stockKeypadPress('0')">0</button><button aria-label="最後の数字を削除" onclick="stockKeypadPress('backspace')">⌫</button>
+    </div>
+    <div class="stock-keypad-actions"><button id="stock-keypad-prev" onclick="stockKeypadMove(-1)">前の商品</button><button id="stock-keypad-next" onclick="stockKeypadMove(1)">次の商品</button></div>
+  </div>
+</div>
 <script>
-var stockOverview = null, stockSheet = null, stockBusy = false, stockLoadId = 0, stockDirty = false;
+var stockOverview = null, stockSheet = null, stockBusy = false, stockLoadId = 0, stockDirty = false, stockKeypadIndex = -1, stockKeypadReplace = true;
+function openStockKeypad(i) {
+  if(stockBusy || !stockSheet || stockSheet.status!=='入力中')return;
+  stockKeypadIndex=i; stockKeypadReplace=true;
+  $('stock-keypad-overlay').hidden=false;
+  refreshStockKeypad();
+  $('stock-keypad-overlay').querySelector('.stock-keypad-grid button').focus({preventScroll:true});
+}
+function closeStockKeypad() {
+  $('stock-keypad-overlay').hidden=true;
+  if(stockKeypadIndex>=0){var field=$('stock-input-'+stockKeypadIndex);if(field)field.focus({preventScroll:true});}
+  stockKeypadIndex=-1;
+}
+function refreshStockKeypad() {
+  var i=stockKeypadIndex, row=stockSheet.rows[i], field=$('stock-input-'+i);
+  $('stock-keypad-title').textContent=row.productName;
+  $('stock-keypad-meta').textContent=(i+1)+' / '+stockSheet.rows.length+' 品目 · 前回 '+(row.previous===''?'記録なし':row.previous);
+  $('stock-keypad-value').textContent=field.value===''?'未入力':field.value;
+  $('stock-keypad-prev').disabled=i===0;
+  $('stock-keypad-next').textContent=i===stockSheet.rows.length-1?'完了':'次の商品';
+  field.scrollIntoView({block:'center',inline:'nearest'});
+}
+function stockKeypadPress(key) {
+  if(stockKeypadIndex<0 || stockBusy)return;
+  var field=$('stock-input-'+stockKeypadIndex), value=field.value;
+  if(key==='clear')value='';
+  else if(key==='backspace')value=stockKeypadReplace?'':value.slice(0,-1);
+  else if(/^\d$/.test(key)){
+    value=stockKeypadReplace?key:(value==='0'?key:value+key);
+    if(value.length>5)return;
+  }else return;
+  stockKeypadReplace=false;
+  field.value=value;stockEdit(stockKeypadIndex);refreshStockKeypad();
+}
+function stockKeypadMove(delta) {
+  if(stockKeypadIndex<0)return;
+  var next=stockKeypadIndex+delta;
+  if(next<0)return;
+  if(next>=stockSheet.rows.length){closeStockKeypad();return;}
+  stockKeypadIndex=next;stockKeypadReplace=true;refreshStockKeypad();
+}
+document.addEventListener('keydown',function(event){
+  if(stockKeypadIndex<0 || $('stock-keypad-overlay').hidden)return;
+  if(/^\d$/.test(event.key)){event.preventDefault();stockKeypadPress(event.key);}
+  else if(event.key==='Backspace' || event.key==='Delete'){event.preventDefault();stockKeypadPress(event.key==='Delete'?'clear':'backspace');}
+  else if(event.key==='Enter'){event.preventDefault();stockKeypadMove(1);}
+  else if(event.key==='Escape'){event.preventDefault();closeStockKeypad();}
+});
 function toggleStockColumns() {
   var full=document.querySelector('.stock-table').classList.toggle('stock-full');
   $('stock-columns').setAttribute('aria-pressed',String(full));
@@ -829,6 +905,7 @@ function stockStep(i,delta) {
 }
 function openStock(date) {
   if (stockBusy) return;
+  if(stockKeypadIndex>=0)closeStockKeypad();
   var seq = ++stockLoadId;
   showScreen('stock-list'); $('stock-sheets').innerHTML=''; $('stock-list-message').textContent='用紙を読み込み中…';
   date=date||$('stock-date').value||stockToday(); $('stock-date').value=date; $('stock-date').max=stockToday();
@@ -854,6 +931,7 @@ function openStockSheet(index) {
   }).withFailureHandler(function(){if(seq===stockLoadId)$('stock-list-message').textContent=MSG_NETWORK;}).mobileGetStockSheet(mobileToken,s.supplierCode,stockOverview.date);
 }
 function renderStockSheet() {
+  if(stockKeypadIndex>=0)closeStockKeypad();
   var s=stockSheet, editable=s.status==='入力中', local=null;
   try { local=JSON.parse(localStorage.getItem(stockDraftKey(s))||'null'); }catch(e){}
   var same=local && local.rows.length===s.rows.length && local.rows.every(function(r,i){return r.azCode===s.rows[i].azCode && String(r.stock)===String(s.rows[i].stock);});
@@ -870,7 +948,7 @@ function renderStockSheet() {
     var v=hasLocal?restored[p.azCode]:p.stock;
     // 新しい用紙だけ前回値を初期表示。保存済み・復元した空欄や0はそのまま保持する。
     if(editable && !s.revision && !hasLocal && v==='' && /^\d{1,5}$/.test(String(p.previous))) v=p.previous;
-    return '<tr><td>'+esc(p.productClass)+'</td><td>'+esc(p.dealCondition)+'</td><td>'+esc(p.azCode)+'</td><td>'+esc(p.productNo)+'</td><td>'+esc(p.productName)+'<small class="stock-inline-code">'+esc(p.azCode)+'</small></td><td>'+esc(p.retailPrice===''?'—':Number(p.retailPrice).toLocaleString())+'</td><td>'+esc(p.teisu)+'</td><td>'+esc(p.previous===''?'—':p.previous)+'</td><td class="stock-entry"><div class="stock-step"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1減らす" onclick="stockStep('+i+',-1)">−</button><input id="stock-input-'+i+'" aria-label="'+esc(p.productName)+'の在庫" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" pattern="[0-9]*" maxlength="5" placeholder=" " value="'+esc(v)+'" '+(!editable?'disabled':'')+' oninput="stockEdit('+i+')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();var n=document.getElementById(\'stock-input-'+(i+1)+'\');if(n)n.focus();}"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1増やす" onclick="stockStep('+i+',1)">＋</button></div></td></tr>';
+    return '<tr><td>'+esc(p.productClass)+'</td><td>'+esc(p.dealCondition)+'</td><td>'+esc(p.azCode)+'</td><td>'+esc(p.productNo)+'</td><td>'+esc(p.productName)+'<small class="stock-inline-code">'+esc(p.azCode)+'</small></td><td>'+esc(p.retailPrice===''?'—':Number(p.retailPrice).toLocaleString())+'</td><td>'+esc(p.teisu)+'</td><td>'+esc(p.previous===''?'—':p.previous)+'</td><td class="stock-entry"><div class="stock-step"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1減らす" onclick="stockStep('+i+',-1)">−</button><input id="stock-input-'+i+'" aria-label="'+esc(p.productName)+'の在庫" type="text" inputmode="none" readonly aria-haspopup="dialog" autocomplete="off" pattern="[0-9]*" maxlength="5" placeholder=" " value="'+esc(v)+'" '+(!editable?'disabled':'')+' onclick="openStockKeypad('+i+')"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1増やす" onclick="stockStep('+i+',1)">＋</button></div></td></tr>';
   }).join('');
   $('stock-confirm').checked=false; $('stock-confirm').disabled=!editable;
   $('stock-confirm-label').hidden=!editable;

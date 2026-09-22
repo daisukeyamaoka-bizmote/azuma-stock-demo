@@ -293,8 +293,8 @@ if(name==='mobileSignIn')res={success:true,token:'demo',user:DEMO_USER};
 else if(name==='mobileGetPendingSummary')res={success:true,totalItems:0,totalQty:0,totalRetail:0,makers:[]};
 else if(name==='mobileGetStockOverview'){var d=demoRead(a[1]);res={success:true,store:d.store,date:d.date,sheets:[{supplierCode:'1734',supplierName:'株式会社能作',status:d.status,total:d.rows.length,saved:d.rows.filter(function(r){return r.stock!=='';}).length}]};}
 else if(name==='mobileGetStockSheet')res=demoRead(a[2]);
-else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});if(a[3].submit===true){if(d.rows.some(function(r){return r.stock==='';}))throw Error('未入力があります');d.status='報告済み';}d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision,status:d.status};}}
-else if(name==='mobileSubmitStock'){var d=demoRead(a[2].date);d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}
+else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});if(a[3].submit===true){if(a[3].confirmed!==true)throw Error('全商品の実在庫を確認してから提出してください');if(d.rows.some(function(r){return r.stock==='';}))throw Error('未入力があります');d.status='報告済み';}d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision,status:d.status};}}
+else if(name==='mobileSubmitStock'){if(a[2].confirmed!==true)throw Error('全商品の実在庫を確認してから提出してください');var d=demoRead(a[2].date);d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
 else if(name==='webCreateOrdersFromStock'){var d=demoRead(a[1].substring(5));d.rows.forEach(function(r,i){r.orderQty=Number(a[3][i].quantity);});d.status='発注済み';demoWrite(d);res={success:true,itemCount:d.rows.filter(function(r){return r.orderQty>0;}).length,quantities:a[3]};}
@@ -720,6 +720,9 @@ window.google={script:{get run(){return demoRunner();}}};
   .stock-step input:not(:placeholder-shown) { background:#eff8f3; }
   .stock-step input[aria-invalid=true] { border-color:var(--err); background:var(--err-bg); }
   .stock-footer { position:sticky; bottom:0; background:var(--bg); padding:16px 0 4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .stock-confirm { width:100%; display:flex; align-items:center; gap:12px; min-height:48px; font-size:16px; cursor:pointer; }
+  .stock-confirm[hidden] { display:none; }
+  .stock-confirm input { width:24px; height:24px; flex:none; accent-color:var(--navy); }
   .stock-footer .stock-action { min-height:60px; }
   .stock-primary { background:var(--navy)!important; color:white!important; }
   .stock-action:disabled,.stock-step button:disabled { opacity:.45; cursor:default; }
@@ -780,8 +783,8 @@ window.google={script:{get run(){return demoRunner();}}};
     <div class="stock-banner" id="stock-message" role="status" aria-live="polite"></div>
     <div class="stock-tools"><button class="stock-action" id="stock-columns" aria-pressed="false" onclick="toggleStockColumns()">紙と同じ全項目を表示</button><span id="stock-network" role="status"></span></div>
     <div class="stock-table-scroll"><table class="stock-table"><thead><tr><th>クラス</th><th>取引条件</th><th>AZコード</th><th>品番</th><th>商品名</th><th>本体価格</th><th>定数</th><th>前回</th><th class="stock-entry">今回の在庫</th></tr></thead><tbody id="stock-rows"></tbody></table></div>
-    <div class="stock-footer"><span id="stock-count" class="stock-count"></span><div style="display:flex;gap:10px"><button class="stock-action" id="stock-save" onclick="saveStock(false)">この用紙を保存</button><button class="stock-action stock-primary" id="stock-submit" onclick="saveStock(true)">保存してCCへ提出</button></div></div>
-    <p class="stock-note">在庫がない場合は「0」を入力。発注数はCCが決定します。前回は直近の提出済み在庫です。</p>
+    <div class="stock-footer"><label class="stock-confirm" id="stock-confirm-label"><input type="checkbox" id="stock-confirm">全商品の実在庫を確認しました</label><span id="stock-count" class="stock-count"></span><div style="display:flex;gap:10px"><button class="stock-action" id="stock-save" onclick="saveStock(false)">この用紙を保存</button><button class="stock-action stock-primary" id="stock-submit" onclick="saveStock(true)">保存してCCへ提出</button></div></div>
+    <p class="stock-note">前回の残数を初期表示しています。変わった商品だけ±または数字入力で修正してください。入荷で増えた分も反映し、在庫がない場合は「0」にします。前回記録のない商品は空欄です。発注数はCCが決定します。</p>
     <button class="stock-action" id="stock-reload" onclick="reloadStock()">最新の保存内容を読み直す</button>
     <button class="stock-action" onclick="downloadStockDraft()">入力の控えをダウンロード</button>
   </div>
@@ -811,9 +814,10 @@ function stockRemember() {
 function stockRefreshCount() {
   if (!stockSheet) return;
   var count = stockClientRows().filter(function(r){return r.stock!=='';}).length;
-  $('stock-count').textContent = count + ' / ' + stockSheet.rows.length + ' 品目 入力済み';
+  $('stock-count').textContent = count + ' / ' + stockSheet.rows.length + ' 品目 数量あり' + (stockSheet.status==='入力中'?' · 実在庫の確認は最後にチェック':'');
 }
 function stockEdit(i) {
+  $('stock-confirm').checked=false;
   var input = $('stock-input-'+i); input.setAttribute('aria-invalid', input.value!=='' && !/^\d{1,5}$/.test(input.value) ? 'true':'false');
   $('stock-message').textContent = '未保存の変更があります。入力は端末に一時保存し、用紙の保存・提出時にCCと共有します。';
   stockRemember(); stockRefreshCount();
@@ -858,19 +862,24 @@ function renderStockSheet() {
   $('stock-heading').textContent=s.supplierName;
   $('stock-position').textContent=(s.position+1)+' / '+stockOverview.sheets.length+' 枚目';
   $('stock-context').textContent=s.store+' ／ 棚卸日 '+s.date;
-  $('stock-message').textContent=!editable?'CCへ提出済みです。在庫数は変更できません。':local?(local.revision===s.revision?'端末に残っている入力を復元しました。保存して続けられます。':'別の保存内容があります。端末の入力を表示しています。控えをダウンロードしてから最新内容を読み直してください。'):'数えた結果を入力してください。入力はこの端末にも一時保存します。';
+  $('stock-message').textContent=!editable?'CCへ提出済みです。在庫数は変更できません。':local?(local.revision===s.revision?'端末に残っている入力を復元しました。保存して続けられます。':'別の保存内容があります。端末の入力を表示しています。控えをダウンロードしてから最新内容を読み直してください。'):'前回の残数を表示しています。実在庫を確認し、変わった数だけ修正してください。表示だけでは確認済みになりません。';
   // 古いリビジョンを維持し、復元値による他端末の保存内容の上書きをサーバーで防ぐ。
   if(local) s.revision=local.revision;
   $('stock-rows').innerHTML=s.rows.map(function(p,i){
-    var v=Object.prototype.hasOwnProperty.call(restored,p.azCode)?restored[p.azCode]:p.stock;
+    var hasLocal=Object.prototype.hasOwnProperty.call(restored,p.azCode);
+    var v=hasLocal?restored[p.azCode]:p.stock;
+    // 新しい用紙だけ前回値を初期表示。保存済み・復元した空欄や0はそのまま保持する。
+    if(editable && !s.revision && !hasLocal && v==='' && /^\d{1,5}$/.test(String(p.previous))) v=p.previous;
     return '<tr><td>'+esc(p.productClass)+'</td><td>'+esc(p.dealCondition)+'</td><td>'+esc(p.azCode)+'</td><td>'+esc(p.productNo)+'</td><td>'+esc(p.productName)+'<small class="stock-inline-code">'+esc(p.azCode)+'</small></td><td>'+esc(p.retailPrice===''?'—':Number(p.retailPrice).toLocaleString())+'</td><td>'+esc(p.teisu)+'</td><td>'+esc(p.previous===''?'—':p.previous)+'</td><td class="stock-entry"><div class="stock-step"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1減らす" onclick="stockStep('+i+',-1)">−</button><input id="stock-input-'+i+'" aria-label="'+esc(p.productName)+'の在庫" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" pattern="[0-9]*" maxlength="5" placeholder=" " value="'+esc(v)+'" '+(!editable?'disabled':'')+' oninput="stockEdit('+i+')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();var n=document.getElementById(\'stock-input-'+(i+1)+'\');if(n)n.focus();}"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1増やす" onclick="stockStep('+i+',1)">＋</button></div></td></tr>';
   }).join('');
+  $('stock-confirm').checked=false; $('stock-confirm').disabled=!editable;
+  $('stock-confirm-label').hidden=!editable;
   $('stock-save').disabled=!editable; $('stock-submit').disabled=!editable;
   showScreen('stock-sheet'); stockRefreshCount();
 }
 function stockSetBusy(busy) {
   stockBusy=busy;
-  ['stock-save','stock-submit','stock-back','stock-reload'].forEach(function(id){$(id).disabled=busy;});
+  ['stock-save','stock-submit','stock-back','stock-reload','stock-confirm'].forEach(function(id){$(id).disabled=busy;});
   $('stock-rows').querySelectorAll('input,button').forEach(function(e){e.disabled=busy;});
 }
 function saveStock(submit) {
@@ -878,8 +887,9 @@ function saveStock(submit) {
   var rows=stockClientRows();
   var bad=rows.findIndex(function(r){return (submit && r.stock==='') || (r.stock!=='' && !/^\d{1,5}$/.test(r.stock));});
   if(bad>=0){$('stock-message').textContent='在庫を0〜99999の整数で入力してください。未入力を0として提出することはできません。';$('stock-input-'+bad).focus();return;}
+  if(submit && !$('stock-confirm').checked){$('stock-message').textContent='全商品の実在庫を確認して、確認チェックを入れてください。前回値の表示だけでは提出できません。';$('stock-confirm').focus();return;}
   stockRemember(); stockSetBusy(true); $('stock-message').textContent='保存中…';
-  var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision,submit:submit};
+  var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision,submit:submit,confirmed:$('stock-confirm').checked};
   function fail(message){stockSetBusy(false);$('stock-message').textContent=message+' 入力はこの画面に残っています。';}
   google.script.run.withSuccessHandler(function(res){
     if(!res.success){fail(res.error);return;}

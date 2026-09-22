@@ -5793,15 +5793,17 @@ function loadStockReports(background) {
   }).withFailureHandler(function(){ccStockLoading=false;if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='通信に失敗しました。一覧を更新してください。';}).webGetStockReports(AUTH_TOKEN);
 }
 function openCCStock(index) {
-  if(ccStockBusy)return;
+  if(ccStockBusy || ccStockLoading)return;
   if(ccStockDirty && !window.confirm('変更中の発注数を破棄して別の報告を開きますか？'))return;
   var r=ccStockReports[index],seq=++ccStockLoadId;
+  ccStockLoading=true;
   document.getElementById('cc-stock-detail').classList.add('hidden');
   google.script.run.withSuccessHandler(function(res){
+    ccStockLoading=false;
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
     ccStockDetail=res; ccStockDirty=false; renderCCStock();
-  }).withFailureHandler(function(){if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='読込に失敗しました。もう一度確認するを押してください。';}).webGetStockReport(AUTH_TOKEN,r.reportId,r.supplierCode);
+  }).withFailureHandler(function(){ccStockLoading=false;if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='読込に失敗しました。もう一度確認するを押してください。';}).webGetStockReport(AUTH_TOKEN,r.reportId,r.supplierCode);
 }
 function renderCCStock() {
   var d=ccStockDetail,editable=d.status==='報告済み';
@@ -5838,7 +5840,7 @@ function createStockOrders() {
 }
 
 function refreshVisibleStockReports() {
-  if(document.hidden || !navigator.onLine || !AUTH_TOKEN || CURRENT_VIEW!=='stock' || ccStockBusy || ccStockLoading)return;
+  if(document.hidden || !navigator.onLine || !AUTH_TOKEN || CURRENT_VIEW!=='stock' || ccStockBusy || ccStockLoading || ccStockDirty)return;
   if(!document.getElementById('cc-stock-detail').classList.contains('hidden'))return;
   loadStockReports(true);
 }

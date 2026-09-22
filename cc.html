@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <base target="_top">
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>アヅマ受発注システム</title>
   <style>
     * { box-sizing: border-box; }
@@ -384,10 +385,40 @@
       #print-root tr { page-break-inside: avoid; }
       .pr-maker { page-break-inside: avoid; }
     }
-  </style>
+
+    button, .nav-item { touch-action:manipulation; }
+    #app-view { grid-template-columns:260px minmax(0,1fr); }
+    main { min-width:0; }
+    #view-stock button { min-height:48px; }
+    #view-stock .stock-report-heading { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; }
+    #cc-stock-sync { display:block; font-size:14px; color:#5c6b7a; margin-top:8px; }
+    #cc-stock-detail > div { -webkit-overflow-scrolling:touch; }
+    #cc-stock-detail table { min-width:620px; }
+    #cc-stock-list table { min-width:580px; }
+    #cc-stock-rows tr:focus-within { background:#edf5ff; }
+    @media(max-width:1100px) {
+      #app-view { grid-template-columns:180px minmax(0,1fr); }
+      #app-view.sidebar-collapsed { grid-template-columns:64px minmax(0,1fr); }
+      main { padding:16px; }
+      #view-stock .panel { padding:16px; }
+      .app-header { padding:0 16px; }
+      .sidebar .nav-item { padding:14px; font-size:15px; }
+      #cc-stock-detail button { margin-bottom:10px; }
+    }
+    @media(max-width:800px) {
+      #app-view, #app-view.sidebar-collapsed { grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto 1fr; grid-template-areas:"header" "sidebar" "main"; }
+      .sidebar { max-height:200px; overflow:auto; padding:8px 0; }
+      #app-view.sidebar-collapsed .sidebar { display:none; }
+      .app-header { min-height:64px; flex-wrap:wrap; gap:8px; padding-block:8px; }
+      .app-header .user { font-size:14px; }
+      .sidebar-toggle { min-width:48px; min-height:48px; }
+      main { padding:12px; }
+      #view-stock .panel { padding:12px; }
+    }
+</style>
   
 </head>
-<body><div style="background:#fff0c9;color:#59441d;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 本番への保存・送信は行いません · 在庫・前回値はサンプル　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
+<body><div style="background:#fff0c9;color:#59441d;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 保存先はこの端末のみ · 別端末のCCには届きません　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
 var PREVIEW_ROWS=[{"azCode":"X1734-1","productName":"片口 - 大","retailPrice":10000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501210","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-316","productName":"片口 - 中","retailPrice":8000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501221","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-2","productName":"片口 - 小ショウ","retailPrice":6500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501220","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-74","productName":"片口 - 大 - 金箔","retailPrice":17000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511210","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-301","productName":"片口 - 中 - 金箔","retailPrice":14000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511221","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-75","productName":"片口 - 小 - 金箔 ショウ","retailPrice":11000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511220","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-137","productName":"ちろり‐S","retailPrice":13000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501241","productClass":"005","dealCondition":"128","teisu":2,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"X1734-116","productName":"ちろり　L","retailPrice":18000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501242","productClass":"005","dealCondition":"128","teisu":2,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-49","productName":"ビアカップ","retailPrice":8000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501330","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-12","productName":"ビアカップ - L","retailPrice":10000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501331","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-176","productName":"カップ","retailPrice":6500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501332","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"X1734-44","productName":"タンブラー","retailPrice":7000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501340","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-13","productName":"NAJIMIタンブラー","retailPrice":9000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501341","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-70","productName":"盃 - 喜器(きき) - II","retailPrice":4000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501260","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-71","productName":"盃 - 喜器(きき) - II 金箔","retailPrice":6000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511260","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":8,"orderQty":"","suggestedQty":0},{"azCode":"X1734-48","productName":"ぐい呑","retailPrice":4500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501270","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":10,"orderQty":"","suggestedQty":0},{"azCode":"X1734-72","productName":"ぐい呑 - 金箔","retailPrice":6500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511270","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-114","productName":"富士山  FUJIYAMA","retailPrice":5000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501285","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":8,"orderQty":"","suggestedQty":0},{"azCode":"X1734-314","productName":"富士山  FUJIYAMA - 金箔","retailPrice":8000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511285","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-40","productName":"マドラー","retailPrice":2000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501350","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"X1734-224","productName":"Kuzushi-Yure -大ダイ","retailPrice":7000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501600","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-11","productName":"Kuzushi-Yure -小ショウ","retailPrice":5500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501610","productClass":"005","dealCondition":"128","teisu":6,"stock":"","previous":6,"orderQty":"","suggestedQty":0},{"azCode":"X1734-196","productName":"Kuzushi-Yure -ミニ","retailPrice":5000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501620","productClass":"005","dealCondition":"128","teisu":6,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-226","productName":"Kuzushi-Yure -ミニ 2ケ入イ","retailPrice":12500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501621","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-202","productName":"Kuzushi-Yure -大　金箔ダイキンパク","retailPrice":10000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511600","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0}];
 var DEMO_USER={email:'demo-store@example.test',name:'銀座三越 デモ',store:'銀座三越',role:'operator'};
 var DEMO_KEY='azuma-stock-preview-data-v1';
@@ -398,7 +429,7 @@ if(name==='mobileSignIn')res={success:true,token:'demo',user:DEMO_USER};
 else if(name==='mobileGetPendingSummary')res={success:true,totalItems:0,totalQty:0,totalRetail:0,makers:[]};
 else if(name==='mobileGetStockOverview'){var d=demoRead(a[1]);res={success:true,store:d.store,date:d.date,sheets:[{supplierCode:'1734',supplierName:'株式会社能作',status:d.status,total:d.rows.length,saved:d.rows.filter(function(r){return r.stock!=='';}).length}]};}
 else if(name==='mobileGetStockSheet')res=demoRead(a[2]);
-else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}}
+else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});if(a[3].submit===true){if(d.rows.some(function(r){return r.stock==='';}))throw Error('未入力があります');d.status='報告済み';}d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision,status:d.status};}}
 else if(name==='mobileSubmitStock'){var d=demoRead(a[2].date);d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
@@ -1008,8 +1039,9 @@ window.google={script:{get run(){return demoRunner();}}};
 
     <!-- 承認管理 -->
     <section id="view-stock" class="hidden">
-      <div class="panel"><div style="display:flex;justify-content:space-between;gap:16px;align-items:center"><div><h2>店舗からの在庫報告</h2><p>在庫数を確認し、必要な商品の発注数を決めます。</p></div><button class="secondary" onclick="loadStockReports()">一覧を更新</button></div></div>
+      <div class="panel"><div class="stock-report-heading"><div><h2>店舗からの在庫報告</h2><p>在庫数を確認し、必要な商品の発注数を決めます。</p></div><button class="secondary" onclick="loadStockReports()">一覧を更新</button></div></div>
       <div id="cc-stock-message" class="panel" role="status" aria-live="polite">読み込み中…</div>
+      <span id="cc-stock-sync" role="status">一覧表示中は30秒ごとに更新。数量の確認中は自動更新しません。</span>
       <div id="cc-stock-list" class="panel" style="overflow:auto"></div>
       <div id="cc-stock-detail" class="panel hidden">
         <h2 id="cc-stock-title"></h2><p id="cc-stock-context"></p>
@@ -5741,28 +5773,34 @@ window.google={script:{get run(){return demoRunner();}}};
 
 <script>
 var ccStockReports=[], ccStockDetail=null, ccStockBusy=false, ccStockLoadId=0;
-function loadStockReports() {
-  if(ccStockBusy)return;
+var ccStockLoading=false, ccStockDirty=false;
+function loadStockReports(background) {
+  if(ccStockBusy || ccStockLoading)return;
+  if(!background && ccStockDirty && !window.confirm('変更中の発注数を破棄して一覧へ戻りますか？'))return;
+  ccStockLoading=true; ccStockDirty=false;
   var seq=++ccStockLoadId;
   document.getElementById('cc-stock-detail').classList.add('hidden');
   document.getElementById('cc-stock-message').textContent='在庫報告を読み込み中…';
   google.script.run.withSuccessHandler(function(res){
+    ccStockLoading=false;
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
     ccStockReports=res.reports;
+    document.getElementById('cc-stock-sync').textContent='最終確認 '+new Date().toLocaleTimeString('ja-JP')+' · 一覧表示中は30秒ごとに更新';
     var pending=res.reports.filter(function(r){return r.status==='報告済み'||r.status==='発注処理中';}).length;
     document.getElementById('cc-stock-message').textContent=res.reports.length?'CC確認待ち '+pending+' 枚 ／ 全 '+res.reports.length+' 枚':'在庫報告はまだありません。店舗で保存すると、ここに表示されます。';
     document.getElementById('cc-stock-list').innerHTML='<table><thead><tr><th>棚卸日</th><th>店舗</th><th>メーカー</th><th>入力</th><th>状態</th><th></th></tr></thead><tbody>'+res.reports.map(function(r,i){return '<tr><td>'+escapeHtml(r.date)+'</td><td>'+escapeHtml(r.store)+'</td><td>'+escapeHtml(r.supplierName)+'</td><td>'+r.saved+' / '+r.total+'</td><td>'+escapeHtml(r.status)+'</td><td><button class="secondary" onclick="openCCStock('+i+')">確認する</button></td></tr>';}).join('')+'</tbody></table>';
-  }).withFailureHandler(function(){if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='通信に失敗しました。一覧を更新してください。';}).webGetStockReports(AUTH_TOKEN);
+  }).withFailureHandler(function(){ccStockLoading=false;if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='通信に失敗しました。一覧を更新してください。';}).webGetStockReports(AUTH_TOKEN);
 }
 function openCCStock(index) {
   if(ccStockBusy)return;
+  if(ccStockDirty && !window.confirm('変更中の発注数を破棄して別の報告を開きますか？'))return;
   var r=ccStockReports[index],seq=++ccStockLoadId;
   document.getElementById('cc-stock-detail').classList.add('hidden');
   google.script.run.withSuccessHandler(function(res){
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
-    ccStockDetail=res; renderCCStock();
+    ccStockDetail=res; ccStockDirty=false; renderCCStock();
   }).withFailureHandler(function(){if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='読込に失敗しました。もう一度確認するを押してください。';}).webGetStockReport(AUTH_TOKEN,r.reportId,r.supplierCode);
 }
 function renderCCStock() {
@@ -5775,7 +5813,7 @@ function renderCCStock() {
     if(r.previous!=='' && r.stock!=='' && Number(r.previous)===Number(r.stock))notes.push('前回と同数');
     if(r.orderWarning)notes.push(r.orderWarning);
     var qty=r.orderQty===''||r.orderQty==null?(r.orderWarning?0:r.suggestedQty):r.orderQty;
-    return '<tr><td>'+escapeHtml(r.azCode)+'</td><td>'+escapeHtml(r.productName)+'</td><td>'+escapeHtml(r.teisu)+'</td><td>'+escapeHtml(r.previous===''?'—':r.previous)+'</td><td>'+escapeHtml(r.stock===''?'未入力':r.stock)+'</td><td><input id="cc-stock-qty-'+i+'" type="number" inputmode="numeric" min="0" max="99999" step="1" aria-label="'+escapeHtml(r.productName)+'の発注数" value="'+escapeHtml(qty)+'" '+(!editable?'disabled':'')+' oninput="updateCCStockTotal()" style="width:90px;min-height:44px;font-size:20px"></td><td>'+escapeHtml(notes.join(' ／ '))+'</td></tr>';
+    return '<tr><td>'+escapeHtml(r.azCode)+'</td><td>'+escapeHtml(r.productName)+'</td><td>'+escapeHtml(r.teisu)+'</td><td>'+escapeHtml(r.previous===''?'—':r.previous)+'</td><td>'+escapeHtml(r.stock===''?'未入力':r.stock)+'</td><td><input id="cc-stock-qty-'+i+'" type="number" inputmode="numeric" min="0" max="99999" step="1" aria-label="'+escapeHtml(r.productName)+'の発注数" value="'+escapeHtml(qty)+'" '+(!editable?'disabled':'')+' oninput="ccStockDirty=true;updateCCStockTotal()" style="width:90px;min-height:44px;font-size:20px"></td><td>'+escapeHtml(notes.join(' ／ '))+'</td></tr>';
   }).join('');
   var btn=document.getElementById('cc-stock-create'); btn.disabled=!editable && d.status!=='発注処理中'; btn.textContent=d.status==='発注処理中'?'保存済みの発注数で起票を再開':'この内容で承認待ちに登録';
   document.getElementById('cc-stock-detail').classList.remove('hidden'); updateCCStockTotal();
@@ -5794,11 +5832,22 @@ function createStockOrders() {
     if(!res.success){failed(res.error);if(d.status==='報告済み')document.getElementById('cc-stock-rows').querySelectorAll('input').forEach(function(e){e.disabled=false;});return;}
     ccStockBusy=false;
     d.rows.forEach(function(r){var decided=(res.quantities||[]).find(function(v){return v.azCode===r.azCode;});if(decided)r.orderQty=Number(decided.quantity);});
-    d.status='発注済み';renderCCStock();
+    ccStockDirty=false; d.status='発注済み';renderCCStock();
     msg.textContent=res.alreadyCreated?'この用紙はすでに起票済みです。承認管理で確認してください。':res.itemCount?'承認待ちに登録しました。承認管理で確認できます。':'発注対象は0件です。在庫記録を残してCC確認を完了しました。';
   }).withFailureHandler(function(){failed('通信が途切れました。起票を再試行するか、一覧を更新して状態を確認してください。');}).webCreateOrdersFromStock(AUTH_TOKEN,d.reportId,d.supplierCode,q,d.revision);
 }
+
+function refreshVisibleStockReports() {
+  if(document.hidden || !navigator.onLine || !AUTH_TOKEN || CURRENT_VIEW!=='stock' || ccStockBusy || ccStockLoading)return;
+  if(!document.getElementById('cc-stock-detail').classList.contains('hidden'))return;
+  loadStockReports(true);
+}
+setInterval(refreshVisibleStockReports,30000);
+document.addEventListener('visibilitychange',refreshVisibleStockReports);
+window.addEventListener('online',refreshVisibleStockReports);
+window.addEventListener('offline',function(){document.getElementById('cc-stock-sync').textContent='オフライン · 表示中の内容は前回取得した情報です。Wi-Fi接続後に更新します。';});
+window.addEventListener('beforeunload',function(e){if(ccStockDirty||ccStockBusy){e.preventDefault();e.returnValue='';}});
 </script>
 
-<script>AUTH_TOKEN='demo';CURRENT_USER={name:'CC デモ',role:'cs'};show('app');document.querySelectorAll('.cs-only').forEach(function(e){e.classList.remove('hidden');});switchView('stock');</script></body>
+<script>AUTH_TOKEN='demo';CURRENT_USER={name:'CC デモ',role:'cs'};show('app');document.querySelectorAll('.cs-only').forEach(function(e){e.classList.remove('hidden');});switchView('stock');;var n=document.getElementById('stock-network');if(n){window.removeEventListener('online',stockNetworkStatus);window.removeEventListener('offline',stockNetworkStatus);stockNetworkStatus=function(){n.textContent='操作デモ · この端末内で保存・CC確認';};stockNetworkStatus();}</script></body>
 </html>

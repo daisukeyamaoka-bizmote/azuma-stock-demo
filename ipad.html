@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>アヅマ 在庫報告</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --navy:#1f4e79; --navy-deep-1:#163a5a; --navy-deep-2:#122f49; --navy-tint:#eaf0f6;
@@ -24,12 +21,12 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
     body {
-      font-family: "Noto Sans JP", -apple-system, "Hiragino Sans", "Meiryo", system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Meiryo", Roboto, system-ui, sans-serif;
       font-size: 20px; line-height: 1.6; color: var(--text); background: var(--bg);
       display: flex; flex-direction: column; -webkit-font-smoothing: antialiased;
     }
     button, input { font-family: inherit; }
-    button { cursor: pointer; }
+    button { cursor: pointer; touch-action: manipulation; }
     .num, .tab-num { font-variant-numeric: tabular-nums; }
 
     @keyframes pashaScan { 0% { transform: translateY(-6%); } 100% { transform: translateY(106%); } }
@@ -285,7 +282,7 @@
     .center-loading span { font-size: 18px; color: var(--text-2); }
   </style>
 </head>
-<body><div style="background:#fff0c9;color:#59441d;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 本番への保存・送信は行いません · 在庫・前回値はサンプル　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
+<body><div style="background:#fff0c9;color:#59441d;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 保存先はこの端末のみ · 別端末のCCには届きません　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
 var PREVIEW_ROWS=[{"azCode":"X1734-1","productName":"片口 - 大","retailPrice":10000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501210","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-316","productName":"片口 - 中","retailPrice":8000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501221","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-2","productName":"片口 - 小ショウ","retailPrice":6500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501220","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-74","productName":"片口 - 大 - 金箔","retailPrice":17000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511210","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-301","productName":"片口 - 中 - 金箔","retailPrice":14000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511221","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-75","productName":"片口 - 小 - 金箔 ショウ","retailPrice":11000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511220","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-137","productName":"ちろり‐S","retailPrice":13000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501241","productClass":"005","dealCondition":"128","teisu":2,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"X1734-116","productName":"ちろり　L","retailPrice":18000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501242","productClass":"005","dealCondition":"128","teisu":2,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-49","productName":"ビアカップ","retailPrice":8000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501330","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"X1734-12","productName":"ビアカップ - L","retailPrice":10000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501331","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-176","productName":"カップ","retailPrice":6500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501332","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"X1734-44","productName":"タンブラー","retailPrice":7000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501340","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-13","productName":"NAJIMIタンブラー","retailPrice":9000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501341","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-70","productName":"盃 - 喜器(きき) - II","retailPrice":4000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501260","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-71","productName":"盃 - 喜器(きき) - II 金箔","retailPrice":6000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511260","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":8,"orderQty":"","suggestedQty":0},{"azCode":"X1734-48","productName":"ぐい呑","retailPrice":4500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501270","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":10,"orderQty":"","suggestedQty":0},{"azCode":"X1734-72","productName":"ぐい呑 - 金箔","retailPrice":6500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511270","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":9,"orderQty":"","suggestedQty":0},{"azCode":"X1734-114","productName":"富士山  FUJIYAMA","retailPrice":5000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501285","productClass":"005","dealCondition":"128","teisu":10,"stock":"","previous":8,"orderQty":"","suggestedQty":0},{"azCode":"X1734-314","productName":"富士山  FUJIYAMA - 金箔","retailPrice":8000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511285","productClass":"005","dealCondition":"128","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-40","productName":"マドラー","retailPrice":2000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501350","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"X1734-224","productName":"Kuzushi-Yure -大ダイ","retailPrice":7000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501600","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-11","productName":"Kuzushi-Yure -小ショウ","retailPrice":5500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501610","productClass":"005","dealCondition":"128","teisu":6,"stock":"","previous":6,"orderQty":"","suggestedQty":0},{"azCode":"X1734-196","productName":"Kuzushi-Yure -ミニ","retailPrice":5000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501620","productClass":"005","dealCondition":"128","teisu":6,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"X1734-226","productName":"Kuzushi-Yure -ミニ 2ケ入イ","retailPrice":12500,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"501621","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"X1734-202","productName":"Kuzushi-Yure -大　金箔ダイキンパク","retailPrice":10000,"supplierName":"株式会社能作","supplierCode":"1734","productNo":"511600","productClass":"005","dealCondition":"128","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0}];
 var DEMO_USER={email:'demo-store@example.test',name:'銀座三越 デモ',store:'銀座三越',role:'operator'};
 var DEMO_KEY='azuma-stock-preview-data-v1';
@@ -296,7 +293,7 @@ if(name==='mobileSignIn')res={success:true,token:'demo',user:DEMO_USER};
 else if(name==='mobileGetPendingSummary')res={success:true,totalItems:0,totalQty:0,totalRetail:0,makers:[]};
 else if(name==='mobileGetStockOverview'){var d=demoRead(a[1]);res={success:true,store:d.store,date:d.date,sheets:[{supplierCode:'1734',supplierName:'株式会社能作',status:d.status,total:d.rows.length,saved:d.rows.filter(function(r){return r.stock!=='';}).length}]};}
 else if(name==='mobileGetStockSheet')res=demoRead(a[2]);
-else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}}
+else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});if(a[3].submit===true){if(d.rows.some(function(r){return r.stock==='';}))throw Error('未入力があります');d.status='報告済み';}d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision,status:d.status};}}
 else if(name==='mobileSubmitStock'){var d=demoRead(a[2].date);d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
@@ -717,7 +714,7 @@ window.google={script:{get run(){return demoRunner();}}};
   .stock-table th.stock-entry { z-index:3; }
   .stock-table .stock-entry { position:sticky; right:0; background:white; box-shadow:-4px 0 8px #172c4310; min-width:192px; }
   .stock-step { display:flex; align-items:center; gap:5px; }
-  .stock-step button { height:48px; width:42px; border:1px solid var(--border-strong); background:#f7f9fb; border-radius:8px; color:var(--navy); font-size:25px; }
+  .stock-step button { height:52px; min-width:48px; width:48px; border:1px solid var(--border-strong); background:#f7f9fb; border-radius:8px; color:var(--navy); font-size:25px; }
   .stock-step input { width:76px; height:52px; text-align:center; font-size:25px; border:2px solid #b6c6d5; border-radius:8px; background:#fffdf4; }
   .stock-step input:focus { outline:3px solid #c3def7; border-color:var(--navy); }
   .stock-step input:not(:placeholder-shown) { background:#eff8f3; }
@@ -730,6 +727,42 @@ window.google={script:{get run(){return demoRunner();}}};
   #scr-stock-sheet { overflow:auto; }
   @media(min-width:700px) { .scr-login { padding:64px max(28px,calc((100vw - 440px)/2)); } .home-body,.home-top,.home-greeting { width:100%; max-width:800px; margin-left:auto; margin-right:auto; } }
   @media(max-width:600px) { .stock-wrap { padding:16px; } .stock-top h1 { font-size:23px; } .stock-footer .stock-action { flex:1; font-size:15px; padding:10px; } }
+
+  .stock-tools { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:12px; }
+  #stock-network { font-size:14px; color:var(--text-2); }
+  .stock-inline-code { display:none; font:14px monospace; color:var(--text-2); font-weight:400; margin-top:4px; }
+  .stock-table-scroll { -webkit-overflow-scrolling:touch; scroll-padding-block:64px; }
+  .stock-table tr:focus-within td { background:#edf5ff; }
+  .stock-table th { font-size:14px; }
+  .stock-footer { padding-bottom:max(12px,env(safe-area-inset-bottom)); }
+  @media(max-width:1100px) {
+    .stock-wrap { padding:16px; }
+    .stock-top { margin-bottom:12px; gap:12px; }
+    .stock-top h1 { font-size:24px; }
+    .stock-note { margin-bottom:12px; }
+    .stock-table:not(.stock-full) { min-width:0; table-layout:fixed; }
+    .stock-table:not(.stock-full) :is(th,td):nth-child(-n+4),
+    .stock-table:not(.stock-full) :is(th,td):nth-child(6) { display:none; }
+    .stock-table:not(.stock-full) .stock-inline-code { display:block; }
+    .stock-table:not(.stock-full) :is(th,td):nth-child(5) { width:auto; min-width:0; overflow-wrap:anywhere; }
+    .stock-table:not(.stock-full) :is(th,td):nth-child(7),
+    .stock-table:not(.stock-full) :is(th,td):nth-child(8) { width:54px; text-align:center; }
+    .stock-table:not(.stock-full) .stock-entry { position:static; width:196px; box-shadow:none; min-width:0; }
+    .stock-step input { width:68px; }
+  }
+  @media(max-width:600px) {
+    .stock-table:not(.stock-full) :is(th,td):nth-child(7),
+    .stock-table:not(.stock-full) :is(th,td):nth-child(8) { width:40px; padding:8px 2px; }
+    .stock-table:not(.stock-full) .stock-entry { width:164px; padding:8px 4px; }
+    .stock-step { gap:4px; }
+    .stock-step input { width:48px; font-size:22px; }
+    .stock-step button { width:48px; min-width:48px; }
+    .stock-table td:nth-child(5) { font-size:15px; }
+    .stock-inline-code { font-size:12px; }
+    .stock-footer > div { width:100%; }
+    .stock-top label { width:100%; }
+    .stock-grid { grid-template-columns:1fr; }
+  }
 </style>
 <div class="scr hidden" id="scr-stock-list">
   <div class="stock-wrap">
@@ -745,6 +778,7 @@ window.google={script:{get run(){return demoRunner();}}};
     <div class="stock-top"><button id="stock-back" onclick="openStock(stockSheet.date)">用紙一覧</button><h1 id="stock-heading">在庫入力</h1><span id="stock-position"></span></div>
     <p class="stock-note" id="stock-context"></p>
     <div class="stock-banner" id="stock-message" role="status" aria-live="polite"></div>
+    <div class="stock-tools"><button class="stock-action" id="stock-columns" aria-pressed="false" onclick="toggleStockColumns()">紙と同じ全項目を表示</button><span id="stock-network" role="status"></span></div>
     <div class="stock-table-scroll"><table class="stock-table"><thead><tr><th>クラス</th><th>取引条件</th><th>AZコード</th><th>品番</th><th>商品名</th><th>本体価格</th><th>定数</th><th>前回</th><th class="stock-entry">今回の在庫</th></tr></thead><tbody id="stock-rows"></tbody></table></div>
     <div class="stock-footer"><span id="stock-count" class="stock-count"></span><div style="display:flex;gap:10px"><button class="stock-action" id="stock-save" onclick="saveStock(false)">この用紙を保存</button><button class="stock-action stock-primary" id="stock-submit" onclick="saveStock(true)">保存してCCへ提出</button></div></div>
     <p class="stock-note">在庫がない場合は「0」を入力。発注数はCCが決定します。前回は直近の提出済み在庫です。</p>
@@ -754,6 +788,17 @@ window.google={script:{get run(){return demoRunner();}}};
 </div>
 <script>
 var stockOverview = null, stockSheet = null, stockBusy = false, stockLoadId = 0, stockDirty = false;
+function toggleStockColumns() {
+  var full=document.querySelector('.stock-table').classList.toggle('stock-full');
+  $('stock-columns').setAttribute('aria-pressed',String(full));
+  $('stock-columns').textContent=full?'入力に必要な項目だけ表示':'紙と同じ全項目を表示';
+}
+function stockNetworkStatus() {
+  document.getElementById('stock-network').textContent=navigator.onLine?'保存・提出時にCCと共有':'オフライン · 入力は端末に保持。Wi-Fi接続後に保存してください';
+}
+window.addEventListener('online',stockNetworkStatus);
+window.addEventListener('offline',stockNetworkStatus);
+stockNetworkStatus();
 function stockToday() { return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date()); }
 function stockDraftKey(sheet) { return 'azuma-stock-v1:' + encodeURIComponent(mobileUser.email) + ':' + sheet.reportId + ':' + sheet.supplierCode; }
 function stockClientRows() { return stockSheet.rows.map(function(p,i) { return {azCode:p.azCode,stock:$('stock-input-'+i).value}; }); }
@@ -818,7 +863,7 @@ function renderStockSheet() {
   if(local) s.revision=local.revision;
   $('stock-rows').innerHTML=s.rows.map(function(p,i){
     var v=Object.prototype.hasOwnProperty.call(restored,p.azCode)?restored[p.azCode]:p.stock;
-    return '<tr><td>'+esc(p.productClass)+'</td><td>'+esc(p.dealCondition)+'</td><td>'+esc(p.azCode)+'</td><td>'+esc(p.productNo)+'</td><td>'+esc(p.productName)+'</td><td>'+esc(p.retailPrice===''?'—':Number(p.retailPrice).toLocaleString())+'</td><td>'+esc(p.teisu)+'</td><td>'+esc(p.previous===''?'—':p.previous)+'</td><td class="stock-entry"><div class="stock-step"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1減らす" onclick="stockStep('+i+',-1)">−</button><input id="stock-input-'+i+'" aria-label="'+esc(p.productName)+'の在庫" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder=" " value="'+esc(v)+'" '+(!editable?'disabled':'')+' oninput="stockEdit('+i+')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();var n=document.getElementById(\'stock-input-'+(i+1)+'\');if(n)n.focus();}"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1増やす" onclick="stockStep('+i+',1)">＋</button></div></td></tr>';
+    return '<tr><td>'+esc(p.productClass)+'</td><td>'+esc(p.dealCondition)+'</td><td>'+esc(p.azCode)+'</td><td>'+esc(p.productNo)+'</td><td>'+esc(p.productName)+'<small class="stock-inline-code">'+esc(p.azCode)+'</small></td><td>'+esc(p.retailPrice===''?'—':Number(p.retailPrice).toLocaleString())+'</td><td>'+esc(p.teisu)+'</td><td>'+esc(p.previous===''?'—':p.previous)+'</td><td class="stock-entry"><div class="stock-step"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1減らす" onclick="stockStep('+i+',-1)">−</button><input id="stock-input-'+i+'" aria-label="'+esc(p.productName)+'の在庫" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" pattern="[0-9]*" maxlength="5" placeholder=" " value="'+esc(v)+'" '+(!editable?'disabled':'')+' oninput="stockEdit('+i+')" onkeydown="if(event.key===\'Enter\'){event.preventDefault();var n=document.getElementById(\'stock-input-'+(i+1)+'\');if(n)n.focus();}"><button '+(!editable?'disabled':'')+' aria-label="'+esc(p.productName)+'の在庫を1増やす" onclick="stockStep('+i+',1)">＋</button></div></td></tr>';
   }).join('');
   $('stock-save').disabled=!editable; $('stock-submit').disabled=!editable;
   showScreen('stock-sheet'); stockRefreshCount();
@@ -834,20 +879,23 @@ function saveStock(submit) {
   var bad=rows.findIndex(function(r){return (submit && r.stock==='') || (r.stock!=='' && !/^\d{1,5}$/.test(r.stock));});
   if(bad>=0){$('stock-message').textContent='在庫を0〜99999の整数で入力してください。未入力を0として提出することはできません。';$('stock-input-'+bad).focus();return;}
   stockRemember(); stockSetBusy(true); $('stock-message').textContent='保存中…';
-  var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision};
+  var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision,submit:submit};
   function fail(message){stockSetBusy(false);$('stock-message').textContent=message+' 入力はこの画面に残っています。';}
   google.script.run.withSuccessHandler(function(res){
     if(!res.success){fail(res.error);return;}
     s.revision=res.revision; s.rows.forEach(function(p,i){p.stock=rows[i].stock;});
     stockDirty=false;
     try{localStorage.removeItem(stockDraftKey(s));}catch(e){}
-    if(!submit){stockSetBusy(false);$('stock-message').textContent='保存しました。途中で閉じても、同じ棚卸日の用紙から再開できます。';return;}
-    $('stock-message').textContent='CCへ提出中…'; options.revision=s.revision;
-    google.script.run.withSuccessHandler(function(result){
-      if(!result.success){fail(result.error);return;}
-      stockSetBusy(false); s.status='報告済み'; renderStockSheet();
-    }).withFailureHandler(function(){fail('提出結果を確認できません。用紙一覧から状態を確認してください。');}).mobileSubmitStock(mobileToken,s.supplierCode,options);
-  }).withFailureHandler(function(){fail(MSG_NETWORK);}).mobileSaveStock(mobileToken,s.supplierCode,rows,options);
+    stockSetBusy(false);
+    if(submit){
+      if(res.status!=='報告済み'){
+        // 古いデプロイへの接続でも、途中保存を提出成功と誤認しない。
+        fail('保存は完了しましたが提出済みを確認できません。最新の保存内容を読み直してください。');return;
+      }
+      s.status=res.status;renderStockSheet();
+    }
+    else $('stock-message').textContent='保存しました。CCの在庫報告にも反映されます。提出までは編集できます。';
+  }).withFailureHandler(function(){fail(submit?'提出結果を確認できません。最新の保存内容を読み直して提出状態を確認してください。':MSG_NETWORK);}).mobileSaveStock(mobileToken,s.supplierCode,rows,options);
 }
 function reloadStock() {
   if(stockBusy)return;
@@ -1676,5 +1724,5 @@ function renderHistory() {
 initApp();
 </script>
 
-<script>mobileUser=DEMO_USER;mobileToken='demo';goHome();</script></body>
+<script>mobileUser=DEMO_USER;mobileToken='demo';goHome();;var n=document.getElementById('stock-network');if(n){window.removeEventListener('online',stockNetworkStatus);window.removeEventListener('offline',stockNetworkStatus);stockNetworkStatus=function(){n.textContent='操作デモ · この端末内で保存・CC確認';};stockNetworkStatus();}</script></body>
 </html>

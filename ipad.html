@@ -726,7 +726,8 @@ window.google={script:{get run(){return demoRunner();}}};
   .stock-keypad-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
   .stock-keypad-head strong { font-size:21px; line-height:1.35; }
   .stock-keypad-head button { border:0; background:transparent; font-size:29px; min-width:44px; min-height:44px; color:var(--navy); }
-  .stock-keypad-meta { color:var(--text-2); font-size:15px; margin-top:4px; }
+  .stock-keypad-meta { display:flex; flex-wrap:wrap; gap:2px 14px; margin-top:8px; color:var(--navy); font-size:22px; font-weight:700; line-height:1.35; }
+  .stock-keypad-meta strong { font-size:inherit; }
   .stock-keypad-value { display:block; margin:12px 0; padding:8px 16px; min-height:72px; border:2px solid var(--navy); border-radius:12px; background:#f5fbff; text-align:right; font-size:38px; font-variant-numeric:tabular-nums; }
   .stock-keypad-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .stock-keypad-grid button { min-height:64px; border:1px solid var(--border-strong); border-radius:10px; background:#f7f9fb; color:var(--navy); font-size:27px; font-weight:700; }
@@ -807,7 +808,7 @@ window.google={script:{get run(){return demoRunner();}}};
 </div>
 <div class="stock-keypad-overlay" id="stock-keypad-overlay" hidden onclick="if(event.target===this)closeStockKeypad()">
   <div class="stock-keypad" role="dialog" aria-modal="true" aria-labelledby="stock-keypad-title">
-    <div class="stock-keypad-head"><div><strong id="stock-keypad-title"></strong><div class="stock-keypad-meta" id="stock-keypad-meta"></div></div><button aria-label="数字入力を閉じる" onclick="closeStockKeypad()">×</button></div>
+    <div class="stock-keypad-head"><div><strong id="stock-keypad-title"></strong><div class="stock-keypad-meta"><span id="stock-keypad-position"></span><strong id="stock-keypad-previous"></strong></div></div><button aria-label="数字入力を閉じる" onclick="closeStockKeypad()">×</button></div>
     <output class="stock-keypad-value" id="stock-keypad-value" aria-live="polite"></output>
     <div class="stock-keypad-grid">
       <button onclick="stockKeypadPress('1')">1</button><button onclick="stockKeypadPress('2')">2</button><button onclick="stockKeypadPress('3')">3</button>
@@ -835,7 +836,8 @@ function closeStockKeypad() {
 function refreshStockKeypad() {
   var i=stockKeypadIndex, row=stockSheet.rows[i], field=$('stock-input-'+i);
   $('stock-keypad-title').textContent=row.productName;
-  $('stock-keypad-meta').textContent=(i+1)+' / '+stockSheet.rows.length+' 品目 · 前回 '+(row.previous===''?'記録なし':row.previous);
+  $('stock-keypad-position').textContent=(i+1)+' / '+stockSheet.rows.length+' 品目';
+  $('stock-keypad-previous').textContent='前回 '+(row.previous===''?'記録なし':row.previous);
   $('stock-keypad-value').textContent=field.value===''?'未入力':field.value;
   $('stock-keypad-prev').disabled=i===0;
   $('stock-keypad-next').textContent=i===stockSheet.rows.length-1?'完了':'次の商品';

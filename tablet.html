@@ -705,6 +705,7 @@ window.google={script:{get run(){return demoRunner();}}};
   .stock-card span { display:block; font-size:16px; color:var(--text-2); }
   .stock-card progress { width:100%; height:8px; accent-color:var(--navy); margin-top:16px; }
   .stock-banner { padding:14px 18px; background:var(--navy-tint); border-radius:8px; font-size:16px; margin-bottom:16px; }
+  #stock-message[hidden] { display:none; }
   .stock-table-scroll { overflow:auto; max-height:calc(100dvh - 340px); min-height:240px; background:white; border:1px solid var(--border-strong); border-radius:10px; }
   .stock-table { border-collapse:separate; border-spacing:0; width:100%; min-width:960px; font-size:15px; }
   .stock-table th { position:sticky; top:0; z-index:2; text-align:left; white-space:nowrap; font-size:13px; background:#edf1f5; color:var(--text-2); padding:14px 8px; }
@@ -740,16 +741,15 @@ window.google={script:{get run(){return demoRunner();}}};
   .stock-confirm { width:100%; display:flex; align-items:center; gap:12px; min-height:48px; font-size:16px; cursor:pointer; }
   .stock-confirm[hidden] { display:none; }
   .stock-confirm input { width:24px; height:24px; flex:none; accent-color:var(--navy); }
+  .stock-footer-actions { display:flex; gap:10px; margin-left:auto; }
   .stock-footer .stock-action { min-height:60px; }
   .stock-primary { background:var(--navy)!important; color:white!important; }
   .stock-action:disabled,.stock-step button:disabled { opacity:.45; cursor:default; }
-  .stock-count { font-size:17px; font-weight:700; }
   #scr-stock-sheet { overflow:auto; }
   @media(min-width:700px) { .scr-login { padding:64px max(28px,calc((100vw - 440px)/2)); } .home-body,.home-top,.home-greeting { width:100%; max-width:800px; margin-left:auto; margin-right:auto; } }
   @media(max-width:600px) { .stock-wrap { padding:16px; } .stock-top h1 { font-size:23px; } .stock-footer .stock-action { flex:1; font-size:15px; padding:10px; } }
 
   .stock-tools { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:12px; }
-  #stock-network { font-size:14px; color:var(--text-2); }
   .stock-inline-code { display:none; font:14px monospace; color:var(--text-2); font-weight:400; margin-top:4px; }
   .stock-table-scroll { -webkit-overflow-scrolling:touch; scroll-padding-block:64px; }
   .stock-table tr:focus-within td { background:#edf5ff; }
@@ -795,15 +795,12 @@ window.google={script:{get run(){return demoRunner();}}};
 </div>
 <div class="scr hidden" id="scr-stock-sheet">
   <div class="stock-wrap">
-    <div class="stock-top"><button id="stock-back" onclick="openStock(stockSheet.date)">用紙一覧</button><h1 id="stock-heading">在庫入力</h1><span id="stock-position"></span></div>
+    <div class="stock-top"><button id="stock-back" onclick="openStock(stockSheet.date)">一覧へ戻る</button><h1 id="stock-heading">在庫入力</h1><span id="stock-position"></span></div>
     <p class="stock-note" id="stock-context"></p>
-    <div class="stock-banner" id="stock-message" role="status" aria-live="polite"></div>
-    <div class="stock-tools"><button class="stock-action" id="stock-columns" aria-pressed="false" onclick="toggleStockColumns()">紙と同じ全項目を表示</button><span id="stock-network" role="status"></span></div>
+    <div class="stock-banner" id="stock-message" role="status" aria-live="polite" hidden><span id="stock-message-text"></span> <button class="stock-action" id="stock-reload" hidden onclick="reloadStock()">再読み込み</button></div>
+    <div class="stock-tools"><button class="stock-action" id="stock-columns" aria-pressed="false" onclick="toggleStockColumns()">紙と同じ全項目を表示</button></div>
     <div class="stock-table-scroll"><table class="stock-table"><thead><tr><th>クラス</th><th>取引条件</th><th>AZコード</th><th>品番</th><th>商品名</th><th>本体価格</th><th>定数</th><th>前回</th><th class="stock-entry">今回の在庫</th></tr></thead><tbody id="stock-rows"></tbody></table></div>
-    <div class="stock-footer"><label class="stock-confirm" id="stock-confirm-label"><input type="checkbox" id="stock-confirm">全商品の実在庫を確認しました</label><span id="stock-count" class="stock-count"></span><div style="display:flex;gap:10px"><button class="stock-action" id="stock-save" onclick="saveStock(false)">この用紙を保存</button><button class="stock-action stock-primary" id="stock-submit" onclick="saveStock(true)">保存してCCへ提出</button></div></div>
-    <p class="stock-note">前回の残数を初期表示しています。変わった商品だけ±または数字入力で修正してください。入荷で増えた分も反映し、在庫がない場合は「0」にします。前回記録のない商品は空欄です。発注数はCCが決定します。</p>
-    <button class="stock-action" id="stock-reload" onclick="reloadStock()">最新の保存内容を読み直す</button>
-    <button class="stock-action" onclick="downloadStockDraft()">入力の控えをダウンロード</button>
+    <div class="stock-footer"><label class="stock-confirm" id="stock-confirm-label"><input type="checkbox" id="stock-confirm">全商品の実在庫を確認しました</label><div class="stock-footer-actions"><button class="stock-action" id="stock-save" onclick="saveStock(false)">一時保存</button><button class="stock-action stock-primary" id="stock-submit" onclick="saveStock(true)">提出</button></div></div>
   </div>
 </div>
 <div class="stock-keypad-overlay" id="stock-keypad-overlay" hidden onclick="if(event.target===this)closeStockKeypad()">
@@ -874,12 +871,11 @@ function toggleStockColumns() {
   $('stock-columns').setAttribute('aria-pressed',String(full));
   $('stock-columns').textContent=full?'入力に必要な項目だけ表示':'紙と同じ全項目を表示';
 }
-function stockNetworkStatus() {
-  document.getElementById('stock-network').textContent=navigator.onLine?'保存・提出時にCCと共有':'オフライン · 入力は端末に保持。Wi-Fi接続後に保存してください';
+function stockNotice(message, canReload) {
+  $('stock-message-text').textContent=message || '';
+  $('stock-reload').hidden=!canReload;
+  $('stock-message').hidden=!message;
 }
-window.addEventListener('online',stockNetworkStatus);
-window.addEventListener('offline',stockNetworkStatus);
-stockNetworkStatus();
 function stockToday() { return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo'}).format(new Date()); }
 function stockDraftKey(sheet) { return 'azuma-stock-v1:' + encodeURIComponent(mobileUser.email) + ':' + sheet.reportId + ':' + sheet.supplierCode; }
 function stockClientRows() { return stockSheet.rows.map(function(p,i) { return {azCode:p.azCode,stock:$('stock-input-'+i).value}; }); }
@@ -887,18 +883,13 @@ function stockRemember() {
   if (!stockSheet || stockSheet.status !== '入力中') return;
   stockDirty = true;
   try { localStorage.setItem(stockDraftKey(stockSheet), JSON.stringify({ revision:stockSheet.revision, rows:stockClientRows() })); }
-  catch(e) { $('stock-message').textContent = '端末に一時保存できません。画面を閉じずに「この用紙を保存」してください。'; }
-}
-function stockRefreshCount() {
-  if (!stockSheet) return;
-  var count = stockClientRows().filter(function(r){return r.stock!=='';}).length;
-  $('stock-count').textContent = count + ' / ' + stockSheet.rows.length + ' 品目 数量あり' + (stockSheet.status==='入力中'?' · 実在庫の確認は最後にチェック':'');
+  catch(e) { stockNotice('端末に一時保存できません。一時保存を押してください。'); }
 }
 function stockEdit(i) {
   $('stock-confirm').checked=false;
   var input = $('stock-input-'+i); input.setAttribute('aria-invalid', input.value!=='' && !/^\d{1,5}$/.test(input.value) ? 'true':'false');
-  $('stock-message').textContent = '未保存の変更があります。入力は端末に一時保存し、用紙の保存・提出時にCCと共有します。';
-  stockRemember(); stockRefreshCount();
+  stockNotice('');
+  stockRemember();
 }
 function stockStep(i,delta) {
   var input = $('stock-input-'+i);
@@ -942,7 +933,7 @@ function renderStockSheet() {
   $('stock-heading').textContent=s.supplierName;
   $('stock-position').textContent=(s.position+1)+' / '+stockOverview.sheets.length+' 枚目';
   $('stock-context').textContent=s.store+' ／ 棚卸日 '+s.date;
-  $('stock-message').textContent=!editable?'CCへ提出済みです。在庫数は変更できません。':local?(local.revision===s.revision?'端末に残っている入力を復元しました。保存して続けられます。':'別の保存内容があります。端末の入力を表示しています。控えをダウンロードしてから最新内容を読み直してください。'):'前回の残数を表示しています。実在庫を確認し、変わった数だけ修正してください。表示だけでは確認済みになりません。';
+  stockNotice(!editable?'CCへ提出済み':local?(local.revision===s.revision?'入力を復元しました':'別の端末で保存されています。必要なら再読み込みしてください。'):'',!!(local && local.revision!==s.revision));
   // 古いリビジョンを維持し、復元値による他端末の保存内容の上書きをサーバーで防ぐ。
   if(local) s.revision=local.revision;
   $('stock-rows').innerHTML=s.rows.map(function(p,i){
@@ -955,7 +946,7 @@ function renderStockSheet() {
   $('stock-confirm').checked=false; $('stock-confirm').disabled=!editable;
   $('stock-confirm-label').hidden=!editable;
   $('stock-save').disabled=!editable; $('stock-submit').disabled=!editable;
-  showScreen('stock-sheet'); stockRefreshCount();
+  showScreen('stock-sheet');
 }
 function stockSetBusy(busy) {
   stockBusy=busy;
@@ -966,11 +957,11 @@ function saveStock(submit) {
   if(stockBusy || !stockSheet || stockSheet.status!=='入力中')return;
   var rows=stockClientRows();
   var bad=rows.findIndex(function(r){return (submit && r.stock==='') || (r.stock!=='' && !/^\d{1,5}$/.test(r.stock));});
-  if(bad>=0){$('stock-message').textContent='在庫を0〜99999の整数で入力してください。未入力を0として提出することはできません。';$('stock-input-'+bad).focus();return;}
-  if(submit && !$('stock-confirm').checked){$('stock-message').textContent='全商品の実在庫を確認して、確認チェックを入れてください。前回値の表示だけでは提出できません。';$('stock-confirm').focus();return;}
-  stockRemember(); stockSetBusy(true); $('stock-message').textContent='保存中…';
+  if(bad>=0){stockNotice('在庫数を入力してください。空欄は提出できません。');$('stock-input-'+bad).focus();return;}
+  if(submit && !$('stock-confirm').checked){stockNotice('実在庫の確認にチェックを入れてください。');$('stock-confirm').focus();return;}
+  stockRemember(); stockSetBusy(true); stockNotice(submit?'提出中…':'保存中…');
   var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision,submit:submit,confirmed:$('stock-confirm').checked};
-  function fail(message){stockSetBusy(false);$('stock-message').textContent=message+' 入力はこの画面に残っています。';}
+  function fail(message){stockSetBusy(false);stockNotice(message,/別の端末|最新の保存内容|提出状態/.test(message));}
   google.script.run.withSuccessHandler(function(res){
     if(!res.success){fail(res.error);return;}
     s.revision=res.revision; s.rows.forEach(function(p,i){p.stock=rows[i].stock;});
@@ -984,19 +975,14 @@ function saveStock(submit) {
       }
       s.status=res.status;renderStockSheet();
     }
-    else $('stock-message').textContent='保存しました。CCの在庫報告にも反映されます。提出までは編集できます。';
+    else stockNotice('一時保存しました');
   }).withFailureHandler(function(){fail(submit?'提出結果を確認できません。最新の保存内容を読み直して提出状態を確認してください。':MSG_NETWORK);}).mobileSaveStock(mobileToken,s.supplierCode,rows,options);
 }
 function reloadStock() {
   if(stockBusy)return;
-  if(stockDirty && !window.confirm('端末の未保存入力を破棄して、サーバーの最新内容を読み直しますか？ 必要なら先に入力の控えをダウンロードしてください。'))return;
+  if(stockDirty && !window.confirm('未保存の入力を破棄して、最新の内容を読み直しますか？'))return;
   try{localStorage.removeItem(stockDraftKey(stockSheet));}catch(e){}
   stockDirty=false; openStockSheet(stockSheet.position);
-}
-function downloadStockDraft() {
-  if(!stockSheet)return;
-  var blob=new Blob([JSON.stringify({store:stockSheet.store,date:stockSheet.date,supplier:stockSheet.supplierName,rows:stockClientRows()},null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='在庫入力-'+stockSheet.date+'.json';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
 }
 window.addEventListener('beforeunload',function(e){if(stockBusy||stockDirty){e.preventDefault();e.returnValue='';}});
 </script>
@@ -1814,5 +1800,5 @@ function renderHistory() {
 initApp();
 </script>
 
-<script>mobileUser=DEMO_USER;mobileToken='demo';goHome();;var n=document.getElementById('stock-network');if(n){window.removeEventListener('online',stockNetworkStatus);window.removeEventListener('offline',stockNetworkStatus);stockNetworkStatus=function(){n.textContent='操作デモ · この端末内で保存・CC確認';};stockNetworkStatus();}</script></body>
+<script>mobileUser=DEMO_USER;mobileToken='demo';goHome();</script></body>
 </html>

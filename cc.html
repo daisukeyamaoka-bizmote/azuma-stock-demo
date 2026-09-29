@@ -496,6 +496,7 @@
     #approval-list .approval-cell-azCode { min-width:120px; white-space:nowrap; }
     #approval-list .approval-actions,#approval-list th:last-child { position:sticky; right:0; background:var(--cc-paper); border-left:1px solid var(--cc-grey); }
     #approval-list th:last-child { background:var(--cc-grey); }
+    .approval-row-status { text-align:center; font-size:12px; margin-top:6px; }
     .row-actions { display:flex; gap:8px; justify-content:center; flex-wrap:nowrap; }
     .row-actions button { flex:0 0 56px; width:56px; min-height:44px; padding:8px 0; margin:0; border:1px solid var(--cc-ink); border-radius:5px; font-size:14px; line-height:1.2; }
     .row-actions button.secondary { background:var(--cc-paper); color:var(--cc-ink); }
@@ -511,7 +512,7 @@
     @media(prefers-reduced-motion:reduce) { .cc-spinner,.loading::before { animation:none; } }
 </style>
 </head>
-<body><div style="background:#fff0c9;color:#59441d;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 保存先はこの端末のみ · 別端末のCCには届きません　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
+<body><div style="background:#e7ebef;color:#173e63;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 保存先はこの端末のみ · 別端末のCCには届きません　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
 var PREVIEW_ROWS=[{"azCode":"SAMPLE-001","productName":"片口サンプル 大","retailPrice":1000,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-001","productClass":"S","dealCondition":"DEMO","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-002","productName":"片口サンプル 中","retailPrice":1200,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-002","productClass":"S","dealCondition":"DEMO","teisu":4,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-003","productName":"片口サンプル 小","retailPrice":1400,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-003","productClass":"S","dealCondition":"DEMO","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-004","productName":"カップサンプル A","retailPrice":1600,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-004","productClass":"S","dealCondition":"DEMO","teisu":6,"stock":"","previous":6,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-005","productName":"カップサンプル B","retailPrice":1800,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-005","productClass":"S","dealCondition":"DEMO","teisu":7,"stock":"","previous":6,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-006","productName":"皿サンプル A","retailPrice":2000,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-006","productClass":"S","dealCondition":"DEMO","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-007","productName":"皿サンプル B","retailPrice":2200,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-007","productClass":"S","dealCondition":"DEMO","teisu":4,"stock":"","previous":4,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-008","productName":"トレーサンプル A","retailPrice":2400,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-008","productClass":"S","dealCondition":"DEMO","teisu":5,"stock":"","previous":4,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-009","productName":"トレーサンプル B","retailPrice":2600,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-009","productClass":"S","dealCondition":"DEMO","teisu":6,"stock":"","previous":4,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-010","productName":"小鉢サンプル A","retailPrice":2800,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-010","productClass":"S","dealCondition":"DEMO","teisu":7,"stock":"","previous":7,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-011","productName":"片口サンプル 大 2","retailPrice":3000,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-011","productClass":"S","dealCondition":"DEMO","teisu":3,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-012","productName":"片口サンプル 中 2","retailPrice":3200,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-012","productClass":"S","dealCondition":"DEMO","teisu":4,"stock":"","previous":2,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-013","productName":"片口サンプル 小 2","retailPrice":3400,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-013","productClass":"S","dealCondition":"DEMO","teisu":5,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-014","productName":"カップサンプル A 2","retailPrice":3600,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-014","productClass":"S","dealCondition":"DEMO","teisu":6,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-015","productName":"カップサンプル B 2","retailPrice":3800,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-015","productClass":"S","dealCondition":"DEMO","teisu":7,"stock":"","previous":5,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-016","productName":"皿サンプル A 2","retailPrice":4000,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-016","productClass":"S","dealCondition":"DEMO","teisu":3,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-017","productName":"皿サンプル B 2","retailPrice":4200,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-017","productClass":"S","dealCondition":"DEMO","teisu":4,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-018","productName":"トレーサンプル A 2","retailPrice":4400,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-018","productClass":"S","dealCondition":"DEMO","teisu":5,"stock":"","previous":3,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-019","productName":"トレーサンプル B 2","retailPrice":4600,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-019","productClass":"S","dealCondition":"DEMO","teisu":6,"stock":"","previous":6,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-020","productName":"小鉢サンプル A 2","retailPrice":4800,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-020","productClass":"S","dealCondition":"DEMO","teisu":7,"stock":"","previous":6,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-021","productName":"片口サンプル 大 3","retailPrice":5000,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-021","productClass":"S","dealCondition":"DEMO","teisu":3,"stock":"","previous":1,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-022","productName":"片口サンプル 中 3","retailPrice":5200,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-022","productClass":"S","dealCondition":"DEMO","teisu":4,"stock":"","previous":4,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-023","productName":"片口サンプル 小 3","retailPrice":5400,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-023","productClass":"S","dealCondition":"DEMO","teisu":5,"stock":"","previous":4,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-024","productName":"カップサンプル A 3","retailPrice":5600,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-024","productClass":"S","dealCondition":"DEMO","teisu":6,"stock":"","previous":4,"orderQty":"","suggestedQty":0},{"azCode":"SAMPLE-025","productName":"カップサンプル B 3","retailPrice":5800,"supplierName":"サンプル工房","supplierCode":"DEMO","productNo":"ITEM-025","productClass":"S","dealCondition":"DEMO","teisu":7,"stock":"","previous":7,"orderQty":"","suggestedQty":0}];
 var DEMO_USER={email:'demo-store@example.test',name:'デモ店舗スタッフ',store:'デモ店舗',role:'operator'};
 var DEMO_KEY='azuma-stock-preview-data-v2';
@@ -527,7 +528,8 @@ else if(name==='mobileSubmitStock'){if(a[2].confirmed!==true)throw Error('全商
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
 else if(name==='webCreateOrdersFromStock'){var d=demoRead(a[1].substring(5));d.rows.forEach(function(r,i){r.orderQty=Number(a[3][i].quantity);});d.status='発注済み';demoWrite(d);res={success:true,itemCount:d.rows.filter(function(r){return r.orderQty>0;}).length,quantities:a[3]};if(window.__stockLoseCreateResponse){window.__stockLoseCreateResponse=false;return;}}
-else if(name==='webGetPendingApprovals'){var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var batches=ordered.map(function(d){var items=d.rows.filter(function(r){return Number(r.orderQty)>0;}).map(function(r,i){return {rowNum:i+2,orderId:'DEMO-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};});return {batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
+else if(name==='webGetPendingApprovals'){if(window.__approvalFailRead)throw Error('offline');var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var rowNum=2;var batches=ordered.map(function(d){var items=d.rows.map(function(r,i){return {rowNum:rowNum++,orderId:'DEMO-'+d.date+'-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};}).filter(function(r){return r.quantity>0;});return {batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
+else if(name==='webUpdateApprovalItem'){if(window.__approvalFailUpdate)throw Error('offline');var found=false;Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).forEach(function(d){d.rows.forEach(function(r,i){if('DEMO-'+d.date+'-'+i!==a[3])return;found=true;r.azCode=a[2].azCode;r.productName=a[2].productName;r.orderQty=Math.min(999,Math.max(1,Number(a[2].quantity)||1));r.retailPrice=Number(a[2].unitRetail);demoWrite(d);});});res=found?{success:true}:{success:false,error:'対象が見つかりません'};}
 else if(name==='webGetApprovalSummary')res={success:true,makers:[],totalItems:0};
 else if(name==='webGetApprovalDetail')res={success:true,items:[]};
 else if(name==='webGetApprovalData')res={success:true,makers:[]};
@@ -543,7 +545,8 @@ function renderCCActivity_(notice) {
   var box=document.getElementById('cc-activity'), requests=Array.from(CC_REQUESTS.values());
   if(!box)return;
   var busy=requests.length>0;
-  box.classList.toggle('hidden',!busy&&!notice);
+  var visible=requests.some(function(r){return !r.quiet && !r.loaders.length;});
+  box.classList.toggle('hidden',busy?!visible:!notice);
   box.setAttribute('aria-busy',String(busy));
   document.getElementById('cc-activity-dismiss').classList.toggle('hidden',busy);
   document.getElementById('cc-activity-text').textContent=busy
@@ -551,7 +554,8 @@ function renderCCActivity_(notice) {
     : (notice||'');
 }
 function dismissCCActivity_(){if(!CC_REQUESTS.size)renderCCActivity_();}
-function ccRun_() {
+function ccRun_(options) {
+  options=options||{};
   var ok=function(){},fail=function(){};
   var chain=new Proxy({}, {get:function(_,name){
     if(name==='withSuccessHandler')return function(fn){ok=fn;return chain;};
@@ -561,9 +565,9 @@ function ccRun_() {
       var key=read?name+JSON.stringify(args):'', listener={ok:ok,fail:fail};
       if(read&&CC_READS.has(key)){CC_READS.get(key).listeners.push(listener);return;}
       if(!read)CC_READS.clear();
-      var loaders=Array.from(document.querySelectorAll('.loading')).filter(function(el){return el.offsetParent!==null;});
+      var loaders=options.indicator?[options.indicator]:Array.from(document.querySelectorAll('.loading,button:disabled')).filter(function(el){return el.offsetParent!==null && (el.tagName!=='BUTTON'||/中[.…]/.test(el.textContent));});
       loaders.forEach(function(el){el.setAttribute('aria-busy','true');});
-      var id=++CC_REQUEST_ID, request={read:read,slow:false,listeners:[listener],loaders:loaders}, done=false;
+      var id=++CC_REQUEST_ID, request={read:read,slow:false,listeners:[listener],loaders:loaders,quiet:!!options.quiet}, done=false;
       CC_REQUESTS.set(id,request);if(read)CC_READS.set(key,request);renderCCActivity_();
       var slow=setTimeout(function(){request.slow=true;renderCCActivity_();},12000);
       // Writes may legitimately run for minutes (PDF generation and sending).
@@ -574,7 +578,7 @@ function ccRun_() {
         CC_REQUESTS.delete(id);
         if(read){if(CC_READS.get(key)===request)CC_READS.delete(key);}else CC_READS.clear();
         loaders.forEach(function(el){if(!Array.from(CC_REQUESTS.values()).some(function(r){return r.loaders.indexOf(el)>=0;}))el.setAttribute('aria-busy','false');});
-        renderCCActivity_(!success?(value&&value.message)||'通信に失敗しました。':null);
+        renderCCActivity_(!success&&!loaders.length&&!options.quiet?(value&&value.message)||'通信に失敗しました。':null);
         if(skipHandlers)return;
         request.listeners.forEach(function(l){
           try{(success?l.ok:l.fail)(value);}catch(e){console.error(e);renderCCActivity_('画面を表示できませんでした。もう一度更新してください。');}
@@ -5614,18 +5618,19 @@ function ccRun_() {
       .webGetPendingApprovals(AUTH_TOKEN);
   }
 
-  function renderApprovalView(res) {
+  function renderApprovalView(res, root) {
+    root=root||document;
     var sumHtml = '';
     sumHtml += '<div class="kpi-card" style="flex:1; min-width:120px;"><div class="label">承認待ち受付数</div><div class="value" style="color:#173e63;">' + res.totalBatches + '</div></div>';
     sumHtml += '<div class="kpi-card" style="flex:1; min-width:120px;"><div class="label">品目数</div><div class="value">' + res.totalItems + '</div></div>';
     sumHtml += '<div class="kpi-card" style="flex:1; min-width:120px;"><div class="label">合計数量</div><div class="value">' + res.totalQty + '</div></div>';
     sumHtml += '<div class="kpi-card" style="flex:1; min-width:120px;"><div class="label">上代合計</div><div class="value">¥' + Number(res.totalRetail || 0).toLocaleString() + '</div></div>';
-    document.getElementById('approval-summary').innerHTML = sumHtml;
+    root.querySelector('#approval-summary').innerHTML = sumHtml;
 
     var html = '';
     res.batches.forEach(function(batch) {
       var bId = escapeHtml(batch.batchId); // DOM属性には従来どおり内部IDを保持する。
-      html += '<div style="margin-bottom:20px; border:1px solid #e7ebef; border-radius:10px; overflow:hidden;">';
+      html += '<div data-approval-batch="' + bId + '" style="margin-bottom:20px; border:1px solid #e7ebef; border-radius:10px; overflow:hidden;">';
       html += '<div style="background:#e7ebef; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid #e7ebef; flex-wrap:wrap;">';
       html += '<div style="display:flex; flex-direction:column; gap:2px;">';
       html += '<span style="font-weight:bold; color:#173e63;">' + escapeHtml(approvalBatchLabel_(batch.batchId)) + '</span>';
@@ -5640,7 +5645,7 @@ function ccRun_() {
       html += '</div>';
 
       batch.makers.forEach(function(mk) {
-        html += '<div style="border-bottom:1px solid #e7ebef;">';
+        html += '<div data-approval-maker="' + escapeHtml(mk.makerCode || mk.makerName) + '" style="border-bottom:1px solid #e7ebef;">';
         html += '<div style="background:#173e63; color:white; padding:10px 16px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">';
         html += '<span>' + escapeHtml(mk.makerName) + '</span>';
         html += '<div style="display:flex; align-items:center; gap:12px;">';
@@ -5698,8 +5703,8 @@ function ccRun_() {
       });
       html += '</div>';
     });
-    document.getElementById('approval-list').innerHTML = html;
-    document.getElementById('approval-content').classList.remove('hidden');
+    root.querySelector('#approval-list').innerHTML = html;
+    root.querySelector('#approval-content').classList.remove('hidden');
   }
 
   // 値札発行用：承認待ちの一覧を紙で印刷する（メーカーごとに集約）
@@ -5835,7 +5840,7 @@ function ccRun_() {
     content.innerHTML = '<div style="text-align:center; padding:40px; color:#173e63;">読み込み中...</div>';
     modal.classList.remove('hidden');
 
-    ccRun_()
+    ccRun_({indicator:content})
       .withSuccessHandler(function(res) {
         if (res && res.success) {
           document.getElementById('po-preview-title').textContent = '発注書プレビュー - ' + (res.makerName || '');
@@ -5891,6 +5896,68 @@ function ccRun_() {
     var row=document.getElementById('approval-row-'+rowNum);
     if(!row)return;row._approvalBusy=busy;row.setAttribute('aria-busy',String(busy));
     row.querySelectorAll('button,input').forEach(function(el){el.disabled=busy;});
+    var message=row.querySelector('.approval-row-status');
+    if(busy&&!message){message=document.createElement('div');message.className='approval-row-status';message.setAttribute('role','status');row.querySelector('.approval-actions').appendChild(message);}
+    if(message)message.textContent=busy?'保存中…':'';
+  }
+
+  // Reconcile by order ID: keep table containers, scrolling, selection and other edits.
+  function patchApprovalView_(res, completedOrderId) {
+    var fresh=document.createElement('div');
+    fresh.innerHTML='<div id="approval-summary"></div><div id="approval-list"></div><div id="approval-content"></div>';
+    renderApprovalView(res,fresh);
+    var list=document.getElementById('approval-list');
+    function syncGroups(parent,nextParent,attribute,update){
+      var old=Array.from(parent.children).filter(function(el){return el.hasAttribute(attribute);});
+      Array.from(nextParent.children).filter(function(el){return el.hasAttribute(attribute);}).forEach(function(next){
+        var current=old.find(function(el){return el.getAttribute(attribute)===next.getAttribute(attribute);});
+        if(current){old.splice(old.indexOf(current),1);update(current,next);}else parent.appendChild(next);
+      });
+      old.forEach(function(el){el.remove();});
+    }
+    syncGroups(list,fresh.querySelector('#approval-list'),'data-approval-batch',function(batch,nextBatch){
+      syncGroups(batch,nextBatch,'data-approval-maker',function(maker,nextMaker){
+        if(maker.firstElementChild.innerHTML!==nextMaker.firstElementChild.innerHTML)maker.firstElementChild.replaceWith(nextMaker.firstElementChild);
+        var body=maker.querySelector('tbody'), nextBody=nextMaker.querySelector('tbody');
+        var old=Array.from(body.querySelectorAll('tr[data-oid]'));
+        Array.from(nextBody.querySelectorAll('tr[data-oid]')).forEach(function(next){
+          var id=next.getAttribute('data-oid');
+          var current=old.find(function(el){return id?el.getAttribute('data-oid')===id:el.id===next.id;});
+          if(!current){body.appendChild(next);return;}
+          old.splice(old.indexOf(current),1);
+          var selected=current.querySelector('.approval-select').checked;
+          var editing=current.querySelector('.edit-azCode');
+          // Other in-progress saves and unchanged rows keep their DOM and focus.
+          if(current._approvalBusy&&id!==completedOrderId)return;
+          if(editing&&id!==completedOrderId&&current.id===next.id)return;
+          if(current.outerHTML===next.outerHTML)return;
+          var draft=editing&&id!==completedOrderId?Array.from(current.querySelectorAll('input[class^="edit-"]')).map(function(el){return {cls:el.className,value:el.value};}):null;
+          current.replaceWith(next);next.querySelector('.approval-select').checked=selected;
+          if(draft){editApprovalItem(Number(next.id.replace('approval-row-','')));draft.forEach(function(field){next.querySelector('.'+field.cls).value=field.value;});}
+        });
+        old.forEach(function(el){el.remove();});
+      });
+    });
+    document.getElementById('approval-summary').innerHTML=fresh.querySelector('#approval-summary').innerHTML;
+    APPROVAL_DATA=res;
+    document.getElementById('approval-content').classList.toggle('hidden',!res.batches.length);
+    document.getElementById('approval-empty').classList.toggle('hidden',!!res.batches.length);
+    syncMakerHeaderCheckboxes_();
+  }
+
+  function refreshApprovalAfterEdit_(rowNum,orderId) {
+    var row=document.getElementById('approval-row-'+rowNum);
+    if(row)row.querySelectorAll('.approval-row-retry').forEach(function(el){el.remove();});
+    ccRun_({indicator:row}).withSuccessHandler(function(res){
+      if(res&&res.success){patchApprovalView_(res,orderId);return;}
+      failed();
+    }).withFailureHandler(failed).webGetPendingApprovals(AUTH_TOKEN);
+    function failed(){
+      setApprovalRowBusy_(rowNum,false);
+      // The write succeeded: do not invite another write when only the read failed.
+      if(row){row.querySelectorAll('button,input').forEach(function(el){el.disabled=true;});row.querySelector('.approval-row-status').textContent='保存済み・表示を再確認';
+        var retry=document.createElement('button');retry.className='secondary approval-row-retry';retry.textContent='再表示';retry.onclick=function(){setApprovalRowBusy_(rowNum,true);refreshApprovalAfterEdit_(rowNum,orderId);};row.querySelector('.approval-actions').appendChild(retry);}
+    }
   }
 
   function saveApprovalItem(rowNum) {
@@ -5909,13 +5976,14 @@ function ccRun_() {
       unitRetail: Number(retailInput.value) || 0
     };
 
+    var orderId=approvalOrderId_(rowNum);
     setApprovalRowBusy_(rowNum,true);
-    ccRun_()
+    ccRun_({indicator:row})
       .withSuccessHandler(function(res) {
-        setApprovalRowBusy_(rowNum,false);
         if (res && res.success) {
-          loadApprovalView();
+          refreshApprovalAfterEdit_(rowNum,orderId);
         } else {
+          setApprovalRowBusy_(rowNum,false);
           alert('更新エラー: ' + ((res && res.error) || ''));
         }
       })
@@ -5924,7 +5992,7 @@ function ccRun_() {
         console.log(err && err.message ? err.message : err);
         alert('通信に失敗しました。時間をおいてもう一度お試しください。解決しない場合は管理者に連絡してください');
       })
-      .webUpdateApprovalItem(AUTH_TOKEN, rowNum, fields, approvalOrderId_(rowNum));
+      .webUpdateApprovalItem(AUTH_TOKEN, rowNum, fields, orderId);
   }
 
   function cancelEditApprovalItem(rowNum) {
@@ -5967,8 +6035,8 @@ function loadStockReports(background) {
   ccStockLoading=true; ccStockDirty=false;
   var seq=++ccStockLoadId;
   document.getElementById('cc-stock-detail').classList.add('hidden');
-  document.getElementById('cc-stock-message').textContent='在庫報告を読み込み中…';
-  ccRun_().withSuccessHandler(function(res){
+  if(!background)document.getElementById('cc-stock-message').textContent='在庫報告を読み込み中…';
+  ccRun_({indicator:document.getElementById('cc-stock-message'),quiet:!!background}).withSuccessHandler(function(res){
     ccStockLoading=false;
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
@@ -5986,7 +6054,7 @@ function openCCStock(index) {
   ccStockLoading=true;
   document.getElementById('cc-stock-detail').classList.add('hidden');
   document.getElementById('cc-stock-message').textContent='在庫報告を開いています…';
-  ccRun_().withSuccessHandler(function(res){
+  ccRun_({indicator:document.getElementById('cc-stock-message')}).withSuccessHandler(function(res){
     ccStockLoading=false;
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
@@ -6025,7 +6093,7 @@ function createStockOrders() {
   if(q.some(function(r){return !/^\d{1,5}$/.test(r.quantity);})) {setCCStockActionMessage('発注数を0〜99999の整数で入力してください。','error');return;}
   ccStockBusy=true; btn.disabled=true; btn.textContent='登録中…';
   document.getElementById('cc-stock-rows').querySelectorAll('input').forEach(function(e){e.disabled=true;});
-  setCCStockActionMessage('承認待ちに登録しています。画面を閉じずにお待ちください。','info');
+  setCCStockActionMessage('');
   var finished=false,checking=false,timer=setTimeout(function(){verify('登録結果を確認できませんでした。承認管理または一覧を更新して状態を確認してください。',true);},window.__stockPreviewWatchdogMs||15000);
   function finishSuccess(res) {
     if(finished)return;
@@ -6056,9 +6124,9 @@ function createStockOrders() {
   }
   function verify(reason,waitAgain) {
     if(finished||checking)return;
-    checking=true;setCCStockActionMessage('登録結果を確認しています…','info');
+    checking=true;btn.textContent='承認待ちに登録';setCCStockActionMessage('登録結果を確認しています…','info');
     var checkTimer=setTimeout(function(){checking=false;finishFailure(reason);},10000);
-    ccRun_().withSuccessHandler(function(latest){
+    ccRun_({indicator:document.getElementById('cc-stock-action-message')}).withSuccessHandler(function(latest){
       clearTimeout(checkTimer);
       checking=false;if(finished)return;
       if(latest && latest.success && latest.status==='発注済み'){
@@ -6071,7 +6139,7 @@ function createStockOrders() {
       }else finishFailure(reason,latest);
     }).withFailureHandler(function(){clearTimeout(checkTimer);checking=false;finishFailure(reason);}).webGetStockReport(AUTH_TOKEN,d.reportId,d.supplierCode);
   }
-  var createRequest=ccRun_().withSuccessHandler(function(res){
+  var createRequest=ccRun_({indicator:btn}).withSuccessHandler(function(res){
     if(finished)return;
     if(res && res.success)finishSuccess(res);
     else verify((res&&res.error)||'登録できませんでした。もう一度お試しください。',false);

@@ -292,7 +292,7 @@
     .center-loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px 20px; }
     .center-spinner { width: 44px; height: 44px; border-radius: 50%; border: 4px solid #dfe7ef; border-top-color: var(--navy); animation: pashaSpin .8s linear infinite; }
     .center-loading span { font-size: 18px; color: var(--text-2); }
-    #stock-message[aria-busy="true"]::before { content:""; display:inline-block; width:18px; height:18px; margin-right:10px; vertical-align:middle; border:3px solid #e7ebef; border-top-color:var(--navy); border-radius:50%; animation:pashaSpin .8s linear infinite; }
+    #stock-message[aria-busy="true"]::before,#stock-list-message[aria-busy="true"]::before { content:""; display:inline-block; width:18px; height:18px; margin-right:10px; vertical-align:middle; border:3px solid #e7ebef; border-top-color:var(--navy); border-radius:50%; animation:pashaSpin .8s linear infinite; }
     #stock-loading[hidden] { display:none; }
     #stock-loading { position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.82); }
     .stock-loading-card { display:flex; flex-direction:column; align-items:center; gap:20px; padding:32px; width:min(360px,calc(100vw - 40px)); border:1px solid #e7ebef; border-radius:12px; background:white; box-shadow:0 8px 32px rgba(23,62,99,.1); text-align:center; }
@@ -1016,7 +1016,7 @@ function cancelStockLoad(){
   stockLoadStop_();stockLoadId++;
   stockLoadError_('読み込みを中止しました。',stockLoadRetry_);
 }
-function stockFetch_(method,args,label,retry,success) {
+function stockFetch_(method,args,label,retry,success,pending) {
   if(stockLoadStop_)stockLoadStop_();
   var seq=++stockLoadId,done=false,previousFocus=document.activeElement;
   stockLoadRetry_=retry;$('stock-list-retry').hidden=true;
@@ -1033,27 +1033,83 @@ function stockFetch_(method,args,label,retry,success) {
   stockLoadStop_=stop;
   function fail(message){if(done||seq!==stockLoadId)return;stop();stockLoadError_(message,retry);}
   try {
-    var runner=google.script.run.withSuccessHandler(function(res){
+    function received(res){
       if(done||seq!==stockLoadId)return;stop();
       if(checkAuthError(res))return;
       if(!res||!res.success){stockLoadError_((res&&res.error)||MSG_NETWORK,retry);return;}
       success(res);
-    }).withFailureHandler(function(){fail(MSG_NETWORK);});
-    runner[method].apply(runner,args);
+    }
+    if(pending)pending.then(received,function(){fail(MSG_NETWORK);});
+    else {var runner=google.script.run.withSuccessHandler(received).withFailureHandler(function(){fail(MSG_NETWORK);});runner[method].apply(runner,args);}
   }catch(e){fail(MSG_NETWORK);}
+}
+var stockOverviewCache_={},stockOverviewPending_={},stockOverviewEpoch_=0;
+function stockInvalidateOverviewClient_(){stockOverviewEpoch_++;stockOverviewCache_={};stockOverviewPending_={};}
+function stockOverviewRequest_(date) {
+  var owner=mobileToken,epoch=stockOverviewEpoch_,existing=stockOverviewPending_[date];
+  if(existing&&existing.owner===owner&&existing.epoch===epoch)return existing.promise;
+  var entry={owner:owner,epoch:epoch};
+  entry.promise=new Promise(function(resolve,reject){
+    var done=false,timer=setTimeout(function(){finish(null,new Error('timeout'));},30000);
+    function finish(res,err){
+      if(done)return;done=true;clearTimeout(timer);
+      if(stockOverviewPending_[date]===entry)delete stockOverviewPending_[date];
+      if(res&&res.success&&owner===mobileToken&&epoch===stockOverviewEpoch_){
+        stockOverviewCache_[date]={owner:owner,loadedAt:Date.now(),data:JSON.parse(JSON.stringify(res))};
+      }
+      if(err)reject(err);else resolve(res);
+    }
+    try {google.script.run.withSuccessHandler(function(res){finish(res);}).withFailureHandler(function(err){finish(null,err);}).mobileGetStockOverview(owner,date,null,false);}
+    catch(err){finish(null,err);}
+  });
+  stockOverviewPending_[date]=entry;return entry.promise;
+}
+function preloadStockOverview_(){
+  if(!mobileToken)return;
+  var date=stockToday(),cached=stockOverviewCache_[date];
+  if(cached&&cached.owner===mobileToken&&Date.now()-cached.loadedAt<30000)return;
+  stockOverviewRequest_(date).catch(function(){});
+}
+function renderStockOverview_(res,owner,loadedAt){
+  stockOverview=JSON.parse(JSON.stringify(res));stockOverview.owner=owner;stockOverview.loadedAt=loadedAt;
+  $('stock-store').textContent=res.store;$('stock-list-message').setAttribute('aria-busy','false');$('stock-list-retry').hidden=true;
+  var done=res.sheets.filter(function(s){return s.status!=='入力中';}).length;
+  $('stock-list-message').textContent=res.sheets.length ? 'CC提出済み '+done+' / '+res.sheets.length+' 枚' : 'この店舗の定数マスターが未登録です。CCへ登録をご依頼ください。';
+  $('stock-sheets').innerHTML=res.sheets.map(function(s,i){return '<button class="stock-card" onclick="openStockSheet('+i+')"><strong>'+esc(s.supplierName||s.supplierCode)+'</strong><span>'+esc(s.status==='発注済み'?'CC確認済み':s.status)+' · '+s.saved+' / '+s.total+' 品目 保存済み</span><progress value="'+s.saved+'" max="'+s.total+'"></progress></button>';}).join('');
 }
 function openStock(date) {
   if (stockBusy) return;
   if(stockKeypadIndex>=0)closeStockKeypad();
-  showScreen('stock-list'); $('stock-sheets').innerHTML=''; $('stock-list-message').textContent='';
+  if(stockLoadStop_)stockLoadStop_();
+  var seq=++stockLoadId,start=performance.now();
+  showScreen('stock-list');
   date=date||$('stock-date').value||stockToday(); $('stock-date').value=date; $('stock-date').max=stockToday();
-  var owner=mobileToken;
-  stockFetch_('mobileGetStockOverview',[mobileToken,date,null,true],'用紙の一覧を読み込み中…',function(){openStock(date);},function(res){
-    stockOverview=res;stockOverview.loadedAt=Date.now();stockOverview.owner=owner; $('stock-store').textContent=res.store;
-    var done=res.sheets.filter(function(s){return s.status!=='入力中';}).length;
-    $('stock-list-message').textContent=res.sheets.length ? 'CC提出済み '+done+' / '+res.sheets.length+' 枚' : 'この店舗の定数マスターが未登録です。CCへ登録をご依頼ください。';
-    $('stock-sheets').innerHTML=res.sheets.map(function(s,i){return '<button class="stock-card" onclick="openStockSheet('+i+')"><strong>'+esc(s.supplierName)+'</strong><span>'+esc(s.status==='発注済み'?'CC確認済み':s.status)+' · '+s.saved+' / '+s.total+' 品目 保存済み</span><progress value="'+s.saved+'" max="'+s.total+'"></progress></button>';}).join('');
-  });
+  var owner=mobileToken,cached=stockOverviewCache_[date];
+  var reusable=cached&&cached.owner===owner&&Date.now()-cached.loadedAt<300000;
+  function displayed(res,loadedAt,source){renderStockOverview_(res,owner,loadedAt);$('stock-sheets').dataset.displayMs=String(Math.round(performance.now()-start));$('stock-sheets').dataset.source=source;}
+  if(reusable){
+    displayed(cached.data,cached.loadedAt,'memory');
+    if(Date.now()-cached.loadedAt<30000)return;
+    $('stock-list-message').textContent='最新状態を確認中…';$('stock-list-message').setAttribute('aria-busy','true');
+    stockOverviewRequest_(date).then(function(res){
+      if(seq!==stockLoadId||owner!==mobileToken)return;
+      $('stock-list-message').setAttribute('aria-busy','false');
+      if(checkAuthError(res))return;
+      if(res&&res.success)renderStockOverview_(res,owner,Date.now());
+      else stockLoadError_((res&&res.error)||MSG_NETWORK,function(){openStock(date);});
+    }).catch(function(){if(seq===stockLoadId){$('stock-list-message').setAttribute('aria-busy','false');stockLoadError_('最新状態を確認できませんでした。',function(){openStock(date);});}});
+    return;
+  }
+  $('stock-sheets').innerHTML='';$('stock-list-message').textContent='';$('stock-list-message').setAttribute('aria-busy','false');
+  stockFetch_('mobileGetStockOverview',[],'用紙の一覧を読み込み中…',function(){openStock(date);},function(res){displayed(res,Date.now(),'server');},stockOverviewRequest_(date));
+}
+function stockUpdateOverviewAfterSave_(sheet){
+  var overview=stockOverview;
+  stockInvalidateOverviewClient_();
+  if(!overview||overview.owner!==mobileToken||overview.date!==sheet.date)return;
+  var item=overview.sheets.find(function(s){return s.supplierCode===sheet.supplierCode;});
+  if(item){item.status=sheet.status;item.saved=sheet.rows.filter(function(r){return r.stock!=='';}).length;item.total=sheet.rows.length;delete item.detail;}
+  stockOverviewCache_[sheet.date]={owner:mobileToken,loadedAt:Date.now(),data:JSON.parse(JSON.stringify(overview))};
 }
 function openStockSheet(index, force) {
   if(stockBusy||!stockOverview)return;
@@ -1109,6 +1165,7 @@ function saveStock(submit) {
   google.script.run.withSuccessHandler(function(res){
     if(!res.success){fail(res.error);return;}
     s.revision=res.revision; s.rows.forEach(function(p,i){p.stock=rows[i].stock;});
+    s.status=res.status||s.status;stockUpdateOverviewAfterSave_(s);
     stockDirty=false;
     try{localStorage.removeItem(stockDraftKey(s));}catch(e){}
     stockSetBusy(false);
@@ -1295,7 +1352,7 @@ function togglePassword() {
 }
 
 function doLogout() {
-  stockOverview=null;stockSheet=null;
+  stockInvalidateOverviewClient_();stockOverview=null;stockSheet=null;
   // サーバー側のセッションも無効化する（端末を紛失・共用しても残らないように）
   if (mobileToken) {
     try {
@@ -1323,6 +1380,7 @@ function goHome() {
   showScreen('home');
   // Legacy photo orders are fetched when that screen is opened, not on the stock entry path.
   $('pendingBadge').classList.add('hidden');
+  preloadStockOverview_();
 }
 
 function refreshPendingBadge() {

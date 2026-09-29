@@ -79,7 +79,6 @@
     .brand { text-align:center; margin-bottom:42px; }
     .brand h1 { margin:0 0 10px; font-size:38px; color:#17212b; font-weight:750; }
     .brand p { margin:0; font-size:17px; color:#687687; }
-    .login-footer { margin:0 32px; padding:16px 0 24px; border-top:1px solid #e2e5e9; text-align:center; font-size:13px; color:#687687; }
     #login-view .field { margin-bottom:20px; }
     #login-view label { color:#17212b; font-weight:700; }
     #login-view input { min-height:60px; border:1px solid #c8d0d9; border-radius:6px; padding:0 18px; background:#fff; }
@@ -114,7 +113,7 @@
       min-height: 44px; /* シニアのタップ/クリック誤操作を減らす */
     }
     button:hover:not(:disabled) { background: #163a5c; }
-    button:disabled { background: #9aa0a6; cursor: wait; }
+    button:disabled { background: #9aa0a6; cursor: not-allowed; }
     button.secondary { background: #f1f3f4; color: #3c4043; }
     button.secondary:hover:not(:disabled) { background: #e8eaed; }
     button.danger { background: #d93025; }
@@ -498,7 +497,7 @@ else if(name==='mobileSubmitStock'){if(a[2].confirmed!==true)throw Error('全商
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
 else if(name==='webCreateOrdersFromStock'){var d=demoRead(a[1].substring(5));d.rows.forEach(function(r,i){r.orderQty=Number(a[3][i].quantity);});d.status='発注済み';demoWrite(d);res={success:true,itemCount:d.rows.filter(function(r){return r.orderQty>0;}).length,quantities:a[3]};if(window.__stockLoseCreateResponse){window.__stockLoseCreateResponse=false;return;}}
-else if(name==='webGetPendingApprovals'){var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var batches=ordered.map(function(d){var items=d.rows.filter(function(r){return Number(r.orderQty)>0;}).map(function(r,i){return {rowNum:i+2,orderId:'DEMO-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};});return {batchId:'STOCK-'+d.reportId+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
+else if(name==='webGetPendingApprovals'){var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var batches=ordered.map(function(d){var items=d.rows.filter(function(r){return Number(r.orderQty)>0;}).map(function(r,i){return {rowNum:i+2,orderId:'DEMO-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};});return {batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
 else if(name==='webGetApprovalSummary')res={success:true,makers:[],totalItems:0};
 else if(name==='webGetApprovalDetail')res={success:true,items:[]};
 else if(name==='webGetApprovalData')res={success:true,makers:[]};
@@ -531,7 +530,6 @@ window.google={script:{get run(){return demoRunner();}}};
 
     <div id="login-msg" class="msg"></div>
   </div>
-  <div class="login-footer">アヅマ株式会社</div>
 </div>
 
 <!-- ============= メインアプリ（サイドバー付きSPA） ============= -->
@@ -1126,11 +1124,8 @@ window.google={script:{get run(){return demoRunner();}}};
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:8px; flex-wrap:wrap;">
           <h2 style="margin:0;">承認待ちの発注</h2>
           <div style="display:flex; align-items:center; gap:14px;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#333; cursor:pointer; white-space:nowrap; flex:none;">
-              <input type="checkbox" id="approval-select-all" onclick="toggleSelectAllApprovals(this)" style="flex:none;">全選択
-            </label>
             <div style="display:flex; gap:8px;">
-              <button class="secondary btn-sm" onclick="printApprovalList()" title="チェックした明細だけを印刷します（何も選択しなければ全件）">値札発行用リストを印刷（選択分）</button>
+              <button class="secondary btn-sm" onclick="printApprovalList()" title="チェックした明細だけを印刷します（何も選択しなければ全件）">値札発行用リストを印刷</button>
               <button class="secondary btn-sm" onclick="loadApprovalView()">更新</button>
             </div>
           </div>
@@ -1920,6 +1915,16 @@ window.google={script:{get run(){return demoRunner();}}};
     el.textContent = text;
   }
 
+  function showUnavailableLogin_() {
+    showMsg('このファイルからはログインできません。実運用画面を開いてください。', 'error');
+    var link = document.createElement('a');
+    link.href = 'https://script.google.com/macros/s/AKfycbxsJmpNMmthxegYwrRfAFe2hmJnt4hn8t7rPzYwrpk5BQN7cTLba-HHzCvxJHlFbgf7/exec';
+    link.textContent = '実運用画面を開く';
+    document.getElementById('login-msg').appendChild(document.createElement('br'));
+    document.getElementById('login-msg').appendChild(link);
+  }
+  if (location.protocol === 'file:') showUnavailableLogin_();
+
   // === ログイン ===
   function toggleLoginPassword(button) {
     var input = document.getElementById('login-password');
@@ -1927,15 +1932,28 @@ window.google={script:{get run(){return demoRunner();}}};
     input.type = show ? 'text' : 'password';
     button.textContent = show ? '非表示' : '表示';
   }
+  var loginAttemptId = 0;
   function doLogin() {
     var email = document.getElementById('login-email').value.trim();
     var password = document.getElementById('login-password').value;
+    if (!window.google || !google.script || !google.script.run) {
+      showUnavailableLogin_();
+      return;
+    }
     if (!email || !password) { showMsg('メールとパスワードを入力', 'error'); return; }
     var btn = document.getElementById('login-btn');
     btn.disabled = true; btn.textContent = 'ログイン中...';
-
-    google.script.run
+    var attempt = ++loginAttemptId;
+    var timer = setTimeout(function() {
+      if (attempt !== loginAttemptId) return;
+      loginAttemptId++;
+      btn.disabled = false; btn.textContent = 'ログイン';
+      showMsg('応答がありません。実運用画面を再読み込みしてお試しください。', 'error');
+    }, 30000);
+    try { google.script.run
       .withSuccessHandler(function(res) {
+        if (attempt !== loginAttemptId) return;
+        clearTimeout(timer);
         if (res && res.success) {
           AUTH_TOKEN = res.token;
           onLoginSuccess(res.user);
@@ -1945,10 +1963,17 @@ window.google={script:{get run(){return demoRunner();}}};
         }
       })
       .withFailureHandler(function(err) {
+        if (attempt !== loginAttemptId) return;
+        clearTimeout(timer);
         showMsg('エラー: ' + err.message, 'error');
         btn.disabled = false; btn.textContent = 'ログイン';
       })
       .signIn({ email: email, password: password });
+    } catch (e) {
+      clearTimeout(timer);
+      btn.disabled = false; btn.textContent = 'ログイン';
+      showMsg('ログイン画面を再読み込みしてお試しください。', 'error');
+    }
   }
 
 
@@ -5122,12 +5147,26 @@ window.google={script:{get run(){return demoRunner();}}};
   var APPROVAL_SEND_READY = false;
   var APPROVAL_SEND_BATCH = null;   // 個別承認時の受付番号（null=すべて）
 
+  function approvalBatchLabel_(batchId) {
+    var raw = String(batchId || '');
+    var match = /^STOCK-STK-(\d{4})-(\d{2})-(\d{2})-/.exec(raw);
+    if (match && APPROVAL_DATA && APPROVAL_DATA.batches) {
+      var batch = APPROVAL_DATA.batches.find(function(b) { return b.batchId === raw; });
+      var maker = batch && batch.makers && batch.makers[0];
+      var store = maker && maker.items && maker.items[0] && maker.items[0].deptStore;
+      if (store && maker.makerName) {
+        return '在庫報告：' + match[1] + '/' + match[2] + '/' + match[3] + '・' + store + '・' + maker.makerName;
+      }
+    }
+    return '受付番号：' + raw;
+  }
+
   function openApprovalSendPreview(batchId) {
     APPROVAL_SEND_READY = false;
     APPROVAL_SEND_BATCH = batchId || null;
     document.getElementById('approval-send-modal').classList.remove('hidden');
     var scopeMsg = APPROVAL_SEND_BATCH
-      ? '<div style="font-size:13px; color:#666; margin-bottom:8px;">受付番号: <strong>' + escapeHtml(APPROVAL_SEND_BATCH) + '</strong> のみを送信します</div>'
+      ? '<div style="font-size:13px; color:#666; margin-bottom:8px;"><strong>' + escapeHtml(approvalBatchLabel_(APPROVAL_SEND_BATCH)) + '</strong> のみを送信します</div>'
       : '';
     document.getElementById('approval-send-body').innerHTML = scopeMsg + '<div class="loading">送信先を確認しています...</div>';
     var btn = document.getElementById('approval-send-confirm-btn');
@@ -5154,7 +5193,7 @@ window.google={script:{get run(){return demoRunner();}}};
 
   // 受付単位の差し戻し（理由は任意入力）
   async function rejectBatch(batchId) {
-    if (!(await confirmDialog_('受付番号: ' + batchId + ' を差し戻してOKに戻します。よろしいですか？'))) return;
+    if (!(await confirmDialog_(approvalBatchLabel_(batchId) + ' を差し戻してOKに戻します。よろしいですか？'))) return;
     var reason = prompt('差し戻しの理由（店舗スタッフへの伝達用・任意）', '') || '';
     google.script.run
       .withSuccessHandler(function(res) {
@@ -5513,11 +5552,11 @@ window.google={script:{get run(){return demoRunner();}}};
 
     var html = '';
     res.batches.forEach(function(batch) {
-      var bId = escapeHtml(batch.batchId);
+      var bId = escapeHtml(batch.batchId); // DOM属性には従来どおり内部IDを保持する。
       html += '<div style="margin-bottom:20px; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden;">';
       html += '<div style="background:#f0f4fa; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid #e0e0e0; flex-wrap:wrap;">';
       html += '<div style="display:flex; flex-direction:column; gap:2px;">';
-      html += '<span style="font-weight:bold; color:#1f4e79;">受付番号: ' + bId + '</span>';
+      html += '<span style="font-weight:bold; color:#1f4e79;">' + escapeHtml(approvalBatchLabel_(batch.batchId)) + '</span>';
       html += '<span style="font-size:12px; color:#666;">' + escapeHtml(batch.createdAt || '') + '</span>';
       html += '</div>';
       // この受付単位で承認/差し戻し
@@ -5608,13 +5647,6 @@ window.google={script:{get run(){return demoRunner();}}};
     syncMakerHeaderCheckboxes_();
   }
 
-  // 全体の「すべて選択」。承認待ち全件（全受付・全メーカー）を対象にする。
-  function toggleSelectAllApprovals(el) {
-    var boxes = document.querySelectorAll('.approval-select');
-    for (var i = 0; i < boxes.length; i++) boxes[i].checked = el.checked;
-    syncMakerHeaderCheckboxes_();
-  }
-
   // メーカー見出しのチェックボックスを、配下明細の選択状態に合わせて更新する
   function syncMakerHeaderCheckboxes_() {
     var headers = document.querySelectorAll('.approval-maker-select-all');
@@ -5626,14 +5658,6 @@ window.google={script:{get run(){return demoRunner();}}};
       for (var i = 0; i < boxes.length; i++) if (boxes[i].checked) checked++;
       headers[h].checked = boxes.length > 0 && checked === boxes.length;
       headers[h].indeterminate = checked > 0 && checked < boxes.length;
-    }
-    var allBoxes = document.querySelectorAll('.approval-select');
-    var allChecked = 0;
-    for (var j = 0; j < allBoxes.length; j++) if (allBoxes[j].checked) allChecked++;
-    var top = document.getElementById('approval-select-all');
-    if (top) {
-      top.checked = allBoxes.length > 0 && allChecked === allBoxes.length;
-      top.indeterminate = allChecked > 0 && allChecked < allBoxes.length;
     }
   }
 
@@ -5670,7 +5694,7 @@ window.google={script:{get run(){return demoRunner();}}};
     function p2(n) { return ('0' + n).slice(-2); }
     var dateStr = now.getFullYear() + '/' + p2(now.getMonth() + 1) + '/' + p2(now.getDate()) + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes());
 
-    var scopeLabel = anySelected ? '（選択した ' + totalItems + ' 件）' : (batchId ? '（受付 ' + escapeHtml(batchId) + '）' : '');
+    var scopeLabel = anySelected ? '（選択した ' + totalItems + ' 件）' : (batchId ? '（' + escapeHtml(approvalBatchLabel_(batchId)) + '）' : '');
     var h = '<h2>値札発行用 発注一覧' + scopeLabel + '</h2>';
     h += '<div class="pr-meta">印刷日時: ' + dateStr + '　／　メーカー数: ' + makerOrder.length + '　／　品目: ' + totalItems + '　／　合計数量: ' + totalQty + '</div>';
     makerOrder.forEach(function(k) {
@@ -5891,7 +5915,13 @@ function renderCCStock() {
     var qty=r.orderQty===''||r.orderQty==null?(r.orderWarning?0:r.suggestedQty):r.orderQty;
     return '<tr><td>'+escapeHtml(r.productName)+'<small class="stock-code">'+escapeHtml(r.azCode)+'</small></td><td>'+escapeHtml(r.teisu)+'</td><td>'+escapeHtml(r.previous===''?'—':r.previous)+'</td><td>'+escapeHtml(r.stock===''?'未入力':r.stock)+'</td><td><input class="stock-order-input" id="cc-stock-qty-'+i+'" type="number" inputmode="numeric" min="0" max="99999" step="1" aria-label="'+escapeHtml(r.productName)+'の発注数" value="'+escapeHtml(qty)+'" '+(!editable?'disabled':'')+' oninput="ccStockDirty=true;updateCCStockTotal()"></td><td>'+escapeHtml(notes.join(' ／ '))+'</td></tr>';
   }).join('');
-  var btn=document.getElementById('cc-stock-create'); btn.disabled=!editable && d.status!=='発注処理中'; btn.textContent=d.status==='発注処理中'?'保存済みの発注数で起票を再開':'この内容で承認待ちに登録';
+  var btn=document.getElementById('cc-stock-create');
+  var hasOrders=d.rows.some(function(r){return Number(r.orderQty)>0;});
+  btn.classList.toggle('hidden',d.status!=='報告済み' && d.status!=='発注処理中' && !(d.status==='発注済み' && hasOrders));
+  btn.disabled=false;
+  btn.textContent=d.status==='発注処理中'?'保存済みの発注数で起票を再開':d.status==='発注済み'?'承認管理を開く':'この内容で承認待ちに登録';
+  if(d.status==='入力中')setCCStockActionMessage('店舗からの提出待ちです。','info');
+  else if(d.status==='発注済み')setCCStockActionMessage(hasOrders?'この用紙は登録済みです。':'発注対象0件として確認済みです。','success');
   document.getElementById('cc-stock-detail').classList.remove('hidden'); updateCCStockTotal();
 }
 function ccStockQuantities(){return ccStockDetail.rows.map(function(r,i){return {azCode:r.azCode,quantity:document.getElementById('cc-stock-qty-'+i).value};});}
@@ -5899,6 +5929,8 @@ function updateCCStockTotal(){var q=ccStockQuantities();document.getElementById(
 function setCCStockActionMessage(text,type){var el=document.getElementById('cc-stock-action-message');el.textContent=text||'';el.className=text?'msg '+(type||'info'):'msg hidden';}
 function createStockOrders() {
   if(ccStockBusy)return;
+  if(ccStockDetail.status==='発注済み'){switchView('approval');return;}
+  if(ccStockDetail.status!=='報告済み' && ccStockDetail.status!=='発注処理中')return;
   var d=ccStockDetail,q=ccStockQuantities(),btn=document.getElementById('cc-stock-create');
   if(q.some(function(r){return !/^\d{1,5}$/.test(r.quantity);})) {setCCStockActionMessage('発注数を0〜99999の整数で入力してください。','error');return;}
   ccStockBusy=true; btn.disabled=true; btn.textContent='登録中…';

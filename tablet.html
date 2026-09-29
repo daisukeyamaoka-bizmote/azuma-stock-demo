@@ -83,7 +83,6 @@
     .login-btn:disabled { opacity: .8; }
     .login-spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; animation: pashaSpin .8s linear infinite; }
     .login-help { text-align:center; font-size:14px; color:#687687; line-height:1.6; margin-top:28px; }
-    .login-footer { flex:none; margin:0 32px; padding:16px 0 24px; border-top:1px solid #e2e5e9; text-align:center; font-size:13px; color:#687687; }
 
     /* ==== ヘッダー（ネイビー） ==== */
     .hdr-navy { background: var(--navy); padding: 56px 20px 18px; flex: none; }
@@ -311,7 +310,7 @@ else if(name==='mobileSubmitStock'){if(a[2].confirmed!==true)throw Error('全商
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
 else if(name==='webCreateOrdersFromStock'){var d=demoRead(a[1].substring(5));d.rows.forEach(function(r,i){r.orderQty=Number(a[3][i].quantity);});d.status='発注済み';demoWrite(d);res={success:true,itemCount:d.rows.filter(function(r){return r.orderQty>0;}).length,quantities:a[3]};if(window.__stockLoseCreateResponse){window.__stockLoseCreateResponse=false;return;}}
-else if(name==='webGetPendingApprovals'){var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var batches=ordered.map(function(d){var items=d.rows.filter(function(r){return Number(r.orderQty)>0;}).map(function(r,i){return {rowNum:i+2,orderId:'DEMO-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};});return {batchId:'STOCK-'+d.reportId+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
+else if(name==='webGetPendingApprovals'){var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var batches=ordered.map(function(d){var items=d.rows.filter(function(r){return Number(r.orderQty)>0;}).map(function(r,i){return {rowNum:i+2,orderId:'DEMO-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};});return {batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
 else if(name==='webGetApprovalSummary')res={success:true,makers:[],totalItems:0};
 else if(name==='webGetApprovalDetail')res={success:true,items:[]};
 else if(name==='webGetApprovalData')res={success:true,makers:[]};
@@ -348,7 +347,6 @@ window.google={script:{get run(){return demoRunner();}}};
   </button>
   <div class="login-help">ログインできないときは<br>本部カスタマーセンターへご連絡ください</div>
   </div>
-  <div class="login-footer">アヅマ株式会社</div>
 </div>
 
 <!-- ============ 2. ホーム ============ -->
@@ -1145,6 +1143,11 @@ function checkAuthError(res) {
 
 // === ログイン ===
 function initApp() {
+  if (location.protocol === 'file:') {
+    showScreen('login');
+    showUnavailableMobileLogin_();
+    return;
+  }
   var saved = localStorage.getItem('pashariToken');
   var savedUser = localStorage.getItem('pashariUser');
   if (saved && savedUser) {
@@ -1168,19 +1171,43 @@ function showLoginError(msg) {
   box.style.animation = '';
 }
 
+function showUnavailableMobileLogin_() {
+  showLoginError('このファイルからはログインできません。実運用画面を開いてください。');
+  var link = document.createElement('a');
+  link.href = 'https://script.google.com/macros/s/AKfycbxsJmpNMmthxegYwrRfAFe2hmJnt4hn8t7rPzYwrpk5BQN7cTLba-HHzCvxJHlFbgf7/exec?page=mobile';
+  link.textContent = '実運用画面を開く';
+  $('loginError').appendChild(document.createElement('br'));
+  $('loginError').appendChild(link);
+}
+
+var mobileLoginAttemptId = 0;
 function doLogin() {
   var email = $('loginEmail').value.trim();
   var pw = $('loginPassword').value;
   showLoginError('');
+  if (!window.google || !google.script || !google.script.run) {
+    showUnavailableMobileLogin_();
+    return;
+  }
   if (!email || !pw) { showLoginError('メールとパスワードを入力してください'); return; }
 
   var btn = $('loginBtn');
   btn.disabled = true;
   $('loginSpinner').classList.remove('hidden');
   $('loginBtnLabel').textContent = 'ログイン中…';
-
-  google.script.run
+  var attempt = ++mobileLoginAttemptId;
+  var timer = setTimeout(function() {
+    if (attempt !== mobileLoginAttemptId) return;
+    mobileLoginAttemptId++;
+    btn.disabled = false;
+    $('loginSpinner').classList.add('hidden');
+    $('loginBtnLabel').textContent = 'ログイン';
+    showLoginError('応答がありません。実運用画面を再読み込みしてお試しください。');
+  }, 30000);
+  try { google.script.run
     .withSuccessHandler(function(res) {
+      if (attempt !== mobileLoginAttemptId) return;
+      clearTimeout(timer);
       btn.disabled = false;
       $('loginSpinner').classList.add('hidden');
       $('loginBtnLabel').textContent = 'ログイン';
@@ -1196,6 +1223,8 @@ function doLogin() {
       goHome();
     })
     .withFailureHandler(function(err) {
+      if (attempt !== mobileLoginAttemptId) return;
+      clearTimeout(timer);
       btn.disabled = false;
       $('loginSpinner').classList.add('hidden');
       $('loginBtnLabel').textContent = 'ログイン';
@@ -1203,6 +1232,13 @@ function doLogin() {
       showLoginError(MSG_NETWORK);
     })
     .mobileSignIn(email, pw);
+  } catch (e) {
+    clearTimeout(timer);
+    btn.disabled = false;
+    $('loginSpinner').classList.add('hidden');
+    $('loginBtnLabel').textContent = 'ログイン';
+    showLoginError(MSG_NETWORK);
+  }
 }
 
 function togglePassword() {

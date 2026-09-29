@@ -292,6 +292,12 @@
     .center-loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px 20px; }
     .center-spinner { width: 44px; height: 44px; border-radius: 50%; border: 4px solid #dfe7ef; border-top-color: var(--navy); animation: pashaSpin .8s linear infinite; }
     .center-loading span { font-size: 18px; color: var(--text-2); }
+    #stock-message[aria-busy="true"]::before { content:""; display:inline-block; width:18px; height:18px; margin-right:10px; vertical-align:middle; border:3px solid #e7ebef; border-top-color:var(--navy); border-radius:50%; animation:pashaSpin .8s linear infinite; }
+    #stock-loading[hidden] { display:none; }
+    #stock-loading { position:fixed; inset:0; z-index:5000; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.82); }
+    .stock-loading-card { display:flex; flex-direction:column; align-items:center; gap:20px; padding:32px; width:min(360px,calc(100vw - 40px)); border:1px solid #e7ebef; border-radius:12px; background:white; box-shadow:0 8px 32px rgba(23,62,99,.1); text-align:center; }
+    #stock-loading-label { font-size:20px; font-weight:600; color:var(--navy); }
+    #stock-loading-cancel { min-height:44px; padding:8px 20px; color:var(--navy); background:#e7ebef; border:0; border-radius:6px; font-size:16px; }
   </style>
 </head>
 <body><div style="background:#e7ebef;color:#173e63;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 保存先はこの端末のみ · 別端末のCCには届きません　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
@@ -303,7 +309,7 @@ function demoWrite(d){var all=JSON.parse(localStorage.getItem(DEMO_KEY)||'{}');a
 function demoRunner(){var ok=function(){},fail=function(){};return new Proxy({}, {get:function(target,name){if(name==='withSuccessHandler')return function(f){ok=f;return this;};if(name==='withFailureHandler')return function(f){fail=f;return this;};return function(){var a=Array.from(arguments);window.__demoCalls=window.__demoCalls||[];window.__demoCalls.push(name);setTimeout(function(){try{var res={success:true};
 if(name==='mobileSignIn')res={success:true,token:'demo',user:DEMO_USER};
 else if(name==='mobileGetPendingSummary')res={success:true,totalItems:0,totalQty:0,totalRetail:0,makers:[]};
-else if(name==='mobileGetStockOverview'){var d=demoRead(a[1]);res={success:true,store:d.store,date:d.date,sheets:[{supplierCode:'DEMO',supplierName:'サンプル工房',status:d.status,total:d.rows.length,saved:d.rows.filter(function(r){return r.stock!=='';}).length}]};}
+else if(name==='mobileGetStockOverview'){var d=demoRead(a[1]);res={success:true,store:d.store,date:d.date,sheets:[{supplierCode:'DEMO',supplierName:'サンプル工房',status:d.status,total:d.rows.length,saved:d.rows.filter(function(r){return r.stock!=='';}).length}]};if(a[3]===true)res.sheets[0].detail=JSON.parse(JSON.stringify(d));}
 else if(name==='mobileGetStockSheet')res=demoRead(a[2]);
 else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline');var d=demoRead(a[3].date);if(d.revision!==a[3].revision)res={success:false,error:'別の端末で保存されています'};else{d.rows.forEach(function(r,i){r.stock=a[2][i].stock===''?'':Number(a[2][i].stock);r.suggestedQty=r.stock===''?0:Math.max(0,r.teisu-r.stock);});if(a[3].submit===true){if(a[3].confirmed!==true)throw Error('全商品の実在庫を確認してから提出してください');if(d.rows.some(function(r){return r.stock==='';}))throw Error('未入力があります');d.status='報告済み';}d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision,status:d.status};}}
 else if(name==='mobileSubmitStock'){if(a[2].confirmed!==true)throw Error('全商品の実在庫を確認してから提出してください');var d=demoRead(a[2].date);d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}
@@ -319,6 +325,7 @@ else if(name==='mobileGetDashboardData')res={success:true,recentTx:[],stockAlert
 ok(res);}catch(e){fail(e);}},window.__demoDelayMs||80);};}});}
 window.google={script:{get run(){return demoRunner();}}};
 </script>
+<div id="stock-loading" hidden><div class="stock-loading-card" role="dialog" aria-modal="true" aria-labelledby="stock-loading-label"><div class="center-spinner" aria-hidden="true"></div><div id="stock-loading-label" role="status" aria-live="polite">用紙を読み込み中…</div><button id="stock-loading-cancel" onclick="cancelStockLoad()">キャンセル</button></div></div>
 
 <!-- ============ 1. ログイン ============ -->
 <div class="scr scr-login" id="scr-login">
@@ -868,6 +875,7 @@ window.google={script:{get run(){return demoRunner();}}};
     <div class="stock-top"><button onclick="goHome()">ホーム</button><h1>今週の在庫入力</h1><label>棚卸日 <input id="stock-date" type="date" onchange="openStock(this.value)"></label></div>
     <div id="stock-store" style="font-weight:700"></div>
     <div id="stock-list-message" role="status" class="stock-banner"></div>
+    <button class="stock-action" id="stock-list-retry" hidden onclick="retryStockLoad()">もう一度読み込む</button>
     <div id="stock-sheets" class="stock-grid"></div>
   </div>
 </div>
@@ -996,32 +1004,67 @@ function stockStep(i,delta) {
   input.value = input.value === '' ? (delta > 0 ? 1 : 0) : Math.max(0,Math.min(99999,(Number(input.value)||0)+delta));
   stockEdit(i);
 }
+var stockLoadStop_ = null, stockLoadRetry_ = null;
+function stockLoadError_(message, retry) {
+  stockLoadRetry_=retry;
+  if(!$('scr-stock-sheet').classList.contains('hidden'))stockNotice(message,true);
+  else {$('stock-list-message').textContent=message;$('stock-list-retry').hidden=false;}
+}
+function retryStockLoad(){if(stockLoadRetry_)stockLoadRetry_();}
+function cancelStockLoad(){
+  if(!stockLoadStop_)return;
+  stockLoadStop_();stockLoadId++;
+  stockLoadError_('読み込みを中止しました。',stockLoadRetry_);
+}
+function stockFetch_(method,args,label,retry,success) {
+  if(stockLoadStop_)stockLoadStop_();
+  var seq=++stockLoadId,done=false,previousFocus=document.activeElement;
+  stockLoadRetry_=retry;$('stock-list-retry').hidden=true;
+  $('stock-loading-label').textContent=label;$('stock-loading').hidden=false;
+  document.querySelectorAll('.scr').forEach(function(el){el.inert=true;});
+  $('stock-loading-cancel').focus();
+  var slow=setTimeout(function(){if(!done)$('stock-loading-label').textContent='通常より時間がかかっています…';},8000);
+  var timer=setTimeout(function(){fail('応答がありません。通信状態を確認して、もう一度読み込んでください。');},window.__stockReadTimeoutMs||30000);
+  function stop(){
+    if(done)return;done=true;clearTimeout(timer);clearTimeout(slow);stockLoadStop_=null;
+    $('stock-loading').hidden=true;document.querySelectorAll('.scr').forEach(function(el){el.inert=false;});
+    if(previousFocus&&previousFocus.isConnected&&previousFocus.offsetParent!==null)previousFocus.focus();
+  }
+  stockLoadStop_=stop;
+  function fail(message){if(done||seq!==stockLoadId)return;stop();stockLoadError_(message,retry);}
+  try {
+    var runner=google.script.run.withSuccessHandler(function(res){
+      if(done||seq!==stockLoadId)return;stop();
+      if(checkAuthError(res))return;
+      if(!res||!res.success){stockLoadError_((res&&res.error)||MSG_NETWORK,retry);return;}
+      success(res);
+    }).withFailureHandler(function(){fail(MSG_NETWORK);});
+    runner[method].apply(runner,args);
+  }catch(e){fail(MSG_NETWORK);}
+}
 function openStock(date) {
   if (stockBusy) return;
   if(stockKeypadIndex>=0)closeStockKeypad();
-  var seq = ++stockLoadId;
-  showScreen('stock-list'); $('stock-sheets').innerHTML=''; $('stock-list-message').textContent='用紙を読み込み中…';
+  showScreen('stock-list'); $('stock-sheets').innerHTML=''; $('stock-list-message').textContent='';
   date=date||$('stock-date').value||stockToday(); $('stock-date').value=date; $('stock-date').max=stockToday();
-  google.script.run.withSuccessHandler(function(res){
-    if(seq!==stockLoadId)return;
-    if(checkAuthError(res))return;
-    if(!res.success){$('stock-list-message').textContent=res.error;return;}
-    stockOverview=res; $('stock-store').textContent=res.store;
+  var owner=mobileToken;
+  stockFetch_('mobileGetStockOverview',[mobileToken,date,null,true],'用紙の一覧を読み込み中…',function(){openStock(date);},function(res){
+    stockOverview=res;stockOverview.loadedAt=Date.now();stockOverview.owner=owner; $('stock-store').textContent=res.store;
     var done=res.sheets.filter(function(s){return s.status!=='入力中';}).length;
     $('stock-list-message').textContent=res.sheets.length ? 'CC提出済み '+done+' / '+res.sheets.length+' 枚' : 'この店舗の定数マスターが未登録です。CCへ登録をご依頼ください。';
     $('stock-sheets').innerHTML=res.sheets.map(function(s,i){return '<button class="stock-card" onclick="openStockSheet('+i+')"><strong>'+esc(s.supplierName)+'</strong><span>'+esc(s.status==='発注済み'?'CC確認済み':s.status)+' · '+s.saved+' / '+s.total+' 品目 保存済み</span><progress value="'+s.saved+'" max="'+s.total+'"></progress></button>';}).join('');
-  }).withFailureHandler(function(){if(seq===stockLoadId)$('stock-list-message').textContent=MSG_NETWORK;}).mobileGetStockOverview(mobileToken,date);
+  });
 }
-function openStockSheet(index) {
-  if(stockBusy)return;
-  var s=stockOverview.sheets[index],seq=++stockLoadId;
-  $('stock-list-message').textContent='用紙を読み込み中…';
-  google.script.run.withSuccessHandler(function(res){
-    if(seq!==stockLoadId)return;
-    if(checkAuthError(res))return;
-    if(!res.success){$('stock-list-message').textContent=res.error;return;}
-    stockSheet=res; stockSheet.position=index; stockDirty=false; renderStockSheet();
-  }).withFailureHandler(function(){if(seq===stockLoadId)$('stock-list-message').textContent=MSG_NETWORK;}).mobileGetStockSheet(mobileToken,s.supplierCode,stockOverview.date);
+function openStockSheet(index, force) {
+  if(stockBusy||!stockOverview)return;
+  var s=stockOverview.sheets[index];
+  function opened(res){stockSheet=res; stockSheet.position=index; stockDirty=false; renderStockSheet();}
+  // A short-lived, account-bound snapshot avoids a second network round trip.
+  // Saved changes still use the server's revision check, including from another device.
+  if(!force && s.detail && stockOverview.owner===mobileToken && Date.now()-stockOverview.loadedAt<30000){
+    opened(JSON.parse(JSON.stringify(s.detail)));delete s.detail;return;
+  }
+  stockFetch_('mobileGetStockSheet',[mobileToken,s.supplierCode,stockOverview.date],'用紙を読み込み中…',function(){openStockSheet(index,true);},opened);
 }
 function renderStockSheet() {
   if(stockKeypadIndex>=0)closeStockKeypad();
@@ -1049,7 +1092,7 @@ function renderStockSheet() {
   showScreen('stock-sheet');
 }
 function stockSetBusy(busy) {
-  stockBusy=busy;
+  stockBusy=busy; $('stock-message').setAttribute('aria-busy',String(busy));
   ['stock-save','stock-submit','stock-back','stock-reload','stock-confirm'].forEach(function(id){$(id).disabled=busy;});
   $('stock-rows').querySelectorAll('input,button').forEach(function(e){e.disabled=busy;});
 }
@@ -1059,6 +1102,7 @@ function saveStock(submit) {
   var bad=rows.findIndex(function(r){return (submit && r.stock==='') || (r.stock!=='' && !/^\d{1,5}$/.test(r.stock));});
   if(bad>=0){stockNotice('在庫数を入力してください。空欄は提出できません。');$('stock-input-'+bad).focus();return;}
   if(submit && !$('stock-confirm').checked){stockNotice('実在庫の確認にチェックを入れてください。');$('stock-confirm').focus();return;}
+  if(stockOverview)stockOverview.sheets.forEach(function(sheet){delete sheet.detail;});
   stockRemember(); stockSetBusy(true); stockNotice(submit?'提出中…':'保存中…');
   var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision,submit:submit,confirmed:$('stock-confirm').checked};
   function fail(message){stockSetBusy(false);stockNotice(message,/別の端末|最新の保存内容|提出状態/.test(message));}
@@ -1082,7 +1126,7 @@ function reloadStock() {
   if(stockBusy)return;
   if(stockDirty && !window.confirm('未保存の入力を破棄して、最新の内容を読み直しますか？'))return;
   try{localStorage.removeItem(stockDraftKey(stockSheet));}catch(e){}
-  stockDirty=false; openStockSheet(stockSheet.position);
+  stockDirty=false; openStockSheet(stockSheet.position,true);
 }
 window.addEventListener('beforeunload',function(e){if(stockBusy||stockDirty){e.preventDefault();e.returnValue='';}});
 </script>
@@ -1114,7 +1158,7 @@ function fmtYen(n) {
 // === 画面切替（screen ステートマシン） ===
 var SCREENS = ['stock-list','stock-sheet','login','home','shoot','scan','result','qty','done','review','sending','sent','sendfail','history'];
 function showScreen(name) {
-  if (name !== 'stock-list' && name !== 'stock-sheet') stockLoadId++;
+  if (name !== 'stock-list' && name !== 'stock-sheet') {if(stockLoadStop_)stockLoadStop_();stockLoadId++;}
   SCREENS.forEach(function(s) {
     $('scr-' + s).classList.toggle('hidden', s !== name);
   });
@@ -1251,6 +1295,7 @@ function togglePassword() {
 }
 
 function doLogout() {
+  stockOverview=null;stockSheet=null;
   // サーバー側のセッションも無効化する（端末を紛失・共用しても残らないように）
   if (mobileToken) {
     try {
@@ -1276,7 +1321,8 @@ function goHome() {
   resetFlowState();
   $('storeBadge').textContent = (mobileUser && mobileUser.store) || '';
   showScreen('home');
-  refreshPendingBadge();
+  // Legacy photo orders are fetched when that screen is opened, not on the stock entry path.
+  $('pendingBadge').classList.add('hidden');
 }
 
 function refreshPendingBadge() {

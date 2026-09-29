@@ -300,7 +300,7 @@ var DEMO_USER={email:'demo-store@example.test',name:'デモ店舗スタッフ',s
 var DEMO_KEY='azuma-stock-preview-data-v2';
 function demoRead(date){var all=JSON.parse(localStorage.getItem(DEMO_KEY)||'{}');return all[date]||{success:true,reportId:'DEMO-'+date,store:'デモ店舗',date:date,supplierCode:'DEMO',supplierName:'サンプル工房',status:'入力中',revision:'',rows:JSON.parse(JSON.stringify(PREVIEW_ROWS))};}
 function demoWrite(d){var all=JSON.parse(localStorage.getItem(DEMO_KEY)||'{}');all[d.date]=d;localStorage.setItem(DEMO_KEY,JSON.stringify(all));}
-function demoRunner(){var ok=function(){},fail=function(){};return new Proxy({}, {get:function(target,name){if(name==='withSuccessHandler')return function(f){ok=f;return this;};if(name==='withFailureHandler')return function(f){fail=f;return this;};return function(){var a=Array.from(arguments);setTimeout(function(){try{var res={success:true};
+function demoRunner(){var ok=function(){},fail=function(){};return new Proxy({}, {get:function(target,name){if(name==='withSuccessHandler')return function(f){ok=f;return this;};if(name==='withFailureHandler')return function(f){fail=f;return this;};return function(){var a=Array.from(arguments);window.__demoCalls=window.__demoCalls||[];window.__demoCalls.push(name);setTimeout(function(){try{var res={success:true};
 if(name==='mobileSignIn')res={success:true,token:'demo',user:DEMO_USER};
 else if(name==='mobileGetPendingSummary')res={success:true,totalItems:0,totalQty:0,totalRetail:0,makers:[]};
 else if(name==='mobileGetStockOverview'){var d=demoRead(a[1]);res={success:true,store:d.store,date:d.date,sheets:[{supplierCode:'DEMO',supplierName:'サンプル工房',status:d.status,total:d.rows.length,saved:d.rows.filter(function(r){return r.stock!=='';}).length}]};}
@@ -315,7 +315,7 @@ else if(name==='webGetApprovalSummary')res={success:true,makers:[],totalItems:0}
 else if(name==='webGetApprovalDetail')res={success:true,items:[]};
 else if(name==='webGetApprovalData')res={success:true,makers:[]};
 else if(name==='mobileGetDashboardData')res={success:true,recentTx:[],stockAlerts:[]};
-ok(res);}catch(e){fail(e);}},80);};}});}
+ok(res);}catch(e){fail(e);}},window.__demoDelayMs||80);};}});}
 window.google={script:{get run(){return demoRunner();}}};
 </script>
 

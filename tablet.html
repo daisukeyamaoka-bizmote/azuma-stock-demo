@@ -1044,7 +1044,8 @@ function stockFetch_(method,args,label,retry,success,pending) {
   }catch(e){fail(MSG_NETWORK);}
 }
 var stockOverviewCache_={},stockOverviewPending_={},stockOverviewEpoch_=0;
-function stockInvalidateOverviewClient_(){stockOverviewEpoch_++;stockOverviewCache_={};stockOverviewPending_={};}
+var stockSheetCache_={},stockSheetBatches_={},stockSheetBatchDone_={},stockSheetRequestId_=0;
+function stockInvalidateOverviewClient_(){stockOverviewEpoch_++;stockOverviewCache_={};stockOverviewPending_={};stockSheetCache_={};stockSheetBatches_={};stockSheetBatchDone_={};}
 function stockOverviewRequest_(date) {
   var owner=mobileToken,epoch=stockOverviewEpoch_,existing=stockOverviewPending_[date];
   if(existing&&existing.owner===owner&&existing.epoch===epoch)return existing.promise;
@@ -1058,16 +1059,70 @@ function stockOverviewRequest_(date) {
         stockOverviewCache_[date]={owner:owner,loadedAt:Date.now(),data:JSON.parse(JSON.stringify(res))};
       }
       if(err)reject(err);else resolve(res);
+      if(res&&res.success&&owner===mobileToken&&epoch===stockOverviewEpoch_)setTimeout(function(){if(owner===mobileToken&&epoch===stockOverviewEpoch_)stockPrepareSheets_(date).catch(function(){});},0);
     }
     try {google.script.run.withSuccessHandler(function(res){finish(res);}).withFailureHandler(function(err){finish(null,err);}).mobileGetStockOverview(owner,date,null,false);}
     catch(err){finish(null,err);}
   });
   stockOverviewPending_[date]=entry;return entry.promise;
 }
+function stockSheetKey_(date,code){return date+'|'+code;}
+function stockCachedSheet_(date,code){
+  var cached=stockSheetCache_[stockSheetKey_(date,code)];
+  return cached&&cached.owner===mobileToken&&cached.epoch===stockOverviewEpoch_&&Date.now()-cached.loadedAt<30000?cached:null;
+}
+function stockPrepareSheets_(date){
+  var owner=mobileToken,epoch=stockOverviewEpoch_,existing=stockSheetBatches_[date];
+  if(existing&&existing.owner===owner&&existing.epoch===epoch)return existing.promise;
+  var prepared=stockSheetBatchDone_[date];
+  if(prepared&&prepared.owner===owner&&prepared.epoch===epoch&&Date.now()-prepared.loadedAt<30000)return Promise.resolve({success:true});
+  var overview=stockOverviewCache_[date];
+  if(!overview||overview.owner!==owner)return Promise.resolve(null);
+  var eligible=overview.data.sheets.filter(function(s){return s.total>0&&s.total<=100;});
+  if(!eligible.length||eligible.every(function(s){return !!stockCachedSheet_(date,s.supplierCode);}))return Promise.resolve({success:true});
+  var requestId=++stockSheetRequestId_,entry={owner:owner,epoch:epoch};
+  entry.promise=new Promise(function(resolve,reject){
+    var done=false,timer=setTimeout(function(){finish(null,new Error('timeout'));},30000);
+    function finish(res,err){
+      if(done)return;done=true;clearTimeout(timer);
+      if(stockSheetBatches_[date]===entry)delete stockSheetBatches_[date];
+      if(res&&res.success&&owner===mobileToken&&epoch===stockOverviewEpoch_){
+        stockSheetBatchDone_[date]={owner:owner,epoch:epoch,loadedAt:Date.now()};
+        (res.sheets||[]).forEach(function(sheet){var key=stockSheetKey_(date,sheet.supplierCode),prior=stockSheetCache_[key];if(sheet.detail&&(!prior||prior.requestId<=requestId))stockSheetCache_[key]={owner:owner,epoch:epoch,requestId:requestId,loadedAt:Date.now(),data:sheet.detail};});
+      }
+      if(err)reject(err);else resolve(res);
+    }
+    try{google.script.run.withSuccessHandler(function(res){finish(res);}).withFailureHandler(function(err){finish(null,err);}).mobileGetStockOverview(owner,date,null,true);}catch(err){finish(null,err);}
+  });
+  stockSheetBatches_[date]=entry;return entry.promise;
+}
+function stockReadSheet_(date,code,force){
+  var owner=mobileToken,epoch=stockOverviewEpoch_;
+  function direct(){var requestId=++stockSheetRequestId_;return new Promise(function(resolve,reject){
+    var done=false,timer=setTimeout(function(){finish(null,new Error('timeout'));},30000);
+    function finish(res,err){if(done)return;done=true;clearTimeout(timer);
+      var key=stockSheetKey_(date,code),prior=stockSheetCache_[key];
+      if(res&&res.success&&owner===mobileToken&&epoch===stockOverviewEpoch_&&(!prior||prior.requestId<=requestId))stockSheetCache_[key]={owner:owner,epoch:epoch,requestId:requestId,loadedAt:Date.now(),data:res};
+      if(err)reject(err);else resolve(res);
+    }
+    try{google.script.run.withSuccessHandler(function(res){finish(res);}).withFailureHandler(function(err){finish(null,err);}).mobileGetStockSheet(owner,code,date);}catch(err){finish(null,err);}
+  });}
+  if(force)return direct();
+  var cached=stockCachedSheet_(date,code);if(cached)return Promise.resolve(cached.data);
+  var batch=stockSheetBatches_[date];
+  if(batch&&batch.owner===owner&&batch.epoch===epoch)return batch.promise.then(function(res){
+    if(owner!==mobileToken||epoch!==stockOverviewEpoch_)throw Error('stale request');
+    var warmed=stockCachedSheet_(date,code);
+    if(warmed)return warmed.data;
+    if(res&&!res.success)return res;
+    return direct();
+  },function(){if(owner!==mobileToken||epoch!==stockOverviewEpoch_)throw Error('stale request');return direct();});
+  return direct();
+}
 function preloadStockOverview_(){
   if(!mobileToken)return;
   var date=stockToday(),cached=stockOverviewCache_[date];
-  if(cached&&cached.owner===mobileToken&&Date.now()-cached.loadedAt<30000)return;
+  if(cached&&cached.owner===mobileToken&&Date.now()-cached.loadedAt<30000){stockPrepareSheets_(date).catch(function(){});return;}
   stockOverviewRequest_(date).catch(function(){});
 }
 function renderStockOverview_(res,owner,loadedAt){
@@ -1086,7 +1141,7 @@ function openStock(date) {
   date=date||$('stock-date').value||stockToday(); $('stock-date').value=date; $('stock-date').max=stockToday();
   var owner=mobileToken,cached=stockOverviewCache_[date];
   var reusable=cached&&cached.owner===owner&&Date.now()-cached.loadedAt<300000;
-  function displayed(res,loadedAt,source){renderStockOverview_(res,owner,loadedAt);$('stock-sheets').dataset.displayMs=String(Math.round(performance.now()-start));$('stock-sheets').dataset.source=source;}
+  function displayed(res,loadedAt,source){renderStockOverview_(res,owner,loadedAt);stockPrepareSheets_(date).catch(function(){});$('stock-sheets').dataset.displayMs=String(Math.round(performance.now()-start));$('stock-sheets').dataset.source=source;}
   if(reusable){
     displayed(cached.data,cached.loadedAt,'memory');
     if(Date.now()-cached.loadedAt<30000)return;
@@ -1104,8 +1159,10 @@ function openStock(date) {
   stockFetch_('mobileGetStockOverview',[],'用紙の一覧を読み込み中…',function(){openStock(date);},function(res){displayed(res,Date.now(),'server');},stockOverviewRequest_(date));
 }
 function stockUpdateOverviewAfterSave_(sheet){
-  var overview=stockOverview;
+  var overview=stockOverview,previousSheets=stockSheetCache_;
   stockInvalidateOverviewClient_();
+  Object.keys(previousSheets).forEach(function(key){var cached=previousSheets[key];if(cached.owner===mobileToken&&Date.now()-cached.loadedAt<30000){cached.epoch=stockOverviewEpoch_;stockSheetCache_[key]=cached;}});
+  stockSheetCache_[stockSheetKey_(sheet.date,sheet.supplierCode)]={owner:mobileToken,epoch:stockOverviewEpoch_,requestId:++stockSheetRequestId_,loadedAt:Date.now(),data:JSON.parse(JSON.stringify(sheet))};
   if(!overview||overview.owner!==mobileToken||overview.date!==sheet.date)return;
   var item=overview.sheets.find(function(s){return s.supplierCode===sheet.supplierCode;});
   if(item){item.status=sheet.status;item.saved=sheet.rows.filter(function(r){return r.stock!=='';}).length;item.total=sheet.rows.length;delete item.detail;}
@@ -1113,14 +1170,11 @@ function stockUpdateOverviewAfterSave_(sheet){
 }
 function openStockSheet(index, force) {
   if(stockBusy||!stockOverview)return;
-  var s=stockOverview.sheets[index];
-  function opened(res){stockSheet=res; stockSheet.position=index; stockDirty=false; renderStockSheet();}
-  // A short-lived, account-bound snapshot avoids a second network round trip.
-  // Saved changes still use the server's revision check, including from another device.
-  if(!force && s.detail && stockOverview.owner===mobileToken && Date.now()-stockOverview.loadedAt<30000){
-    opened(JSON.parse(JSON.stringify(s.detail)));delete s.detail;return;
-  }
-  stockFetch_('mobileGetStockSheet',[mobileToken,s.supplierCode,stockOverview.date],'用紙を読み込み中…',function(){openStockSheet(index,true);},opened);
+  var s=stockOverview.sheets[index],date=stockOverview.date,start=performance.now();
+  function opened(res,source){stockSheet=JSON.parse(JSON.stringify(res));stockSheet.position=index;stockDirty=false;renderStockSheet();$('stock-rows').dataset.displayMs=String(Math.round(performance.now()-start));$('stock-rows').dataset.source=source;}
+  var cached=!force&&stockCachedSheet_(date,s.supplierCode);
+  if(cached){if(stockLoadStop_)stockLoadStop_();stockLoadId++;opened(cached.data,'memory');return;}
+  stockFetch_('mobileGetStockSheet',[],'用紙を読み込み中…',function(){openStockSheet(index,true);},function(res){opened(res,'server');},stockReadSheet_(date,s.supplierCode,force));
 }
 function renderStockSheet() {
   if(stockKeypadIndex>=0)closeStockKeypad();
@@ -1158,6 +1212,9 @@ function saveStock(submit) {
   var bad=rows.findIndex(function(r){return (submit && r.stock==='') || (r.stock!=='' && !/^\d{1,5}$/.test(r.stock));});
   if(bad>=0){stockNotice('在庫数を入力してください。空欄は提出できません。');$('stock-input-'+bad).focus();return;}
   if(submit && !$('stock-confirm').checked){stockNotice('実在庫の確認にチェックを入れてください。');$('stock-confirm').focus();return;}
+  stockOverviewEpoch_++;stockOverviewPending_={};stockSheetBatches_={};stockSheetBatchDone_={};
+  Object.keys(stockSheetCache_).forEach(function(key){stockSheetCache_[key].epoch=stockOverviewEpoch_;});
+  delete stockSheetCache_[stockSheetKey_(stockSheet.date,stockSheet.supplierCode)];
   if(stockOverview)stockOverview.sheets.forEach(function(sheet){delete sheet.detail;});
   stockRemember(); stockSetBusy(true); stockNotice(submit?'提出中…':'保存中…');
   var s=stockSheet,options={date:s.date,store:s.store,revision:s.revision,submit:submit,confirmed:$('stock-confirm').checked};

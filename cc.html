@@ -510,6 +510,13 @@
     #cc-activity button { min-height:36px; padding:4px 8px; font-size:13px; }
     @keyframes ccSpin { to { transform:rotate(360deg); } }
     @media(prefers-reduced-motion:reduce) { .cc-spinner,.loading::before { animation:none; } }
+
+    #cc-stock-loader { display:none; position:fixed; inset:0; z-index:2200; background:rgba(231,235,239,.7); align-items:center; justify-content:center; }
+    #cc-stock-loader[aria-busy="true"] { display:flex; }
+    #cc-stock-loader>div { background:white; padding:28px 36px; border:1px solid #e7ebef; border-radius:12px; display:flex; gap:16px; align-items:center; }
+    .stock-date-folder { border:1px solid #e7ebef; border-radius:8px; margin-bottom:12px; overflow:hidden; }
+    .stock-date-folder summary { cursor:pointer; padding:18px 20px; background:#e7ebef; font-weight:700; }
+    .stock-date-folder summary span { float:right; font-weight:400; }
 </style>
 </head>
 <body><div style="background:#e7ebef;color:#173e63;padding:10px 16px;font:14px system-ui;flex:none;z-index:9999">操作デモ · 保存先はこの端末のみ · 別端末のCCには届きません　<a href="tablet.html">店舗画面</a> ／ <a href="cc.html">CC画面</a> ／ <a href="index.html">使い方</a></div><script>
@@ -527,8 +534,9 @@ else if(name==='mobileSaveStock'){if(window.__stockFailSave)throw Error('offline
 else if(name==='mobileSubmitStock'){if(a[2].confirmed!==true)throw Error('全商品の実在庫を確認してから提出してください');var d=demoRead(a[2].date);d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res={success:true,revision:d.revision};}
 else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).map(function(d){return {reportId:d.reportId,store:d.store,date:d.date,supplierCode:d.supplierCode,supplierName:d.supplierName,status:d.status,saved:d.rows.filter(function(r){return r.stock!=='';}).length,total:d.rows.length};})};
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
+else if(name==='webReopenStockOrders'){var d=demoRead(a[1].substring(5));d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res=d;}
 else if(name==='webCreateOrdersFromStock'){var d=demoRead(a[1].substring(5));d.rows.forEach(function(r,i){r.orderQty=Number(a[3][i].quantity);});d.status='発注済み';demoWrite(d);res={success:true,itemCount:d.rows.filter(function(r){return r.orderQty>0;}).length,quantities:a[3]};if(window.__stockLoseCreateResponse){window.__stockLoseCreateResponse=false;return;}}
-else if(name==='webGetPendingApprovals'){if(window.__approvalFailRead)throw Error('offline');var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var rowNum=2;var batches=ordered.map(function(d){var items=d.rows.map(function(r,i){return {rowNum:rowNum++,orderId:'DEMO-'+d.date+'-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};}).filter(function(r){return r.quantity>0;});return {batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
+else if(name==='webGetPendingApprovals'){if(window.__approvalFailRead)throw Error('offline');var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var rowNum=2;var batches=ordered.map(function(d){var items=d.rows.map(function(r,i){return {rowNum:rowNum++,orderId:'DEMO-'+d.date+'-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,storeCode:'001',productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};}).filter(function(r){return r.quantity>0;});return {stockReportId:d.reportId,stockSupplierCode:d.supplierCode,batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
 else if(name==='webUpdateApprovalItem'){if(window.__approvalFailUpdate)throw Error('offline');var found=false;Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).forEach(function(d){d.rows.forEach(function(r,i){if('DEMO-'+d.date+'-'+i!==a[3])return;found=true;r.azCode=a[2].azCode;r.productName=a[2].productName;r.orderQty=Math.min(999,Math.max(1,Number(a[2].quantity)||1));r.retailPrice=Number(a[2].unitRetail);demoWrite(d);});});res=found?{success:true}:{success:false,error:'対象が見つかりません'};}
 else if(name==='webGetApprovalSummary')res={success:true,makers:[],totalItems:0};
 else if(name==='webGetApprovalDetail')res={success:true,items:[]};
@@ -537,6 +545,7 @@ else if(name==='mobileGetDashboardData')res={success:true,recentTx:[],stockAlert
 ok(res);}catch(e){fail(e);}},window.__demoDelayMs||80);};}});}
 window.google={script:{get run(){return demoRunner();}}};
 </script>
+<div id="cc-stock-loader" aria-busy="false" role="status" aria-live="polite"><div><span class="cc-spinner" aria-hidden="true"></span><span id="cc-stock-loader-text">読み込み中…</span></div></div>
 <div id="cc-activity" class="hidden" role="status" aria-live="polite" aria-busy="false"><span class="cc-spinner" aria-hidden="true"></span><span id="cc-activity-text"></span><button id="cc-activity-dismiss" class="secondary hidden" onclick="dismissCCActivity_()">閉じる</button></div>
 <script id="cc-transport">
 // Share only in-flight reads. No business data or tokens are persisted here.
@@ -627,7 +636,7 @@ function ccRun_(options) {
     <div class="nav-main">
       <div class="nav-group">
         <div class="nav-group-label">受発注管理</div>
-        <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')" title="ダッシュボード"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="step-no">ホーム</span><span class="nav-item-label">ダッシュボード</span></div>
+        <div class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')" title="ホーム"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-item-label">ホーム</span></div>
         <div class="nav-item" data-view="orders" onclick="switchView('orders')" title="受注一覧"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4v2h6V4"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="19" x2="12" y2="19"/></svg></span><span class="nav-item-label">受注一覧</span></div>
         <div class="nav-item cs-only" data-view="stock" onclick="switchView('stock')" title="在庫報告"><span class="icon" aria-hidden="true">▤</span><span class="nav-item-label">在庫報告</span></div>
         <div class="nav-item cs-only" data-view="approval" onclick="switchView('approval')" title="承認管理"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span class="nav-item-label">承認管理</span></div>
@@ -1179,6 +1188,7 @@ function ccRun_(options) {
               <th>メール</th>
               <th>表示名</th>
               <th>店舗</th>
+              <th>店舗コード</th>
               <th>権限</th>
               <th>ステータス</th>
               <th>最終ログイン</th>
@@ -1199,9 +1209,11 @@ function ccRun_(options) {
       <div id="cc-stock-list" class="panel" style="overflow:auto"></div>
       <div id="cc-stock-detail" class="panel hidden">
         <h2 id="cc-stock-title"></h2><p id="cc-stock-context"></p>
-        <details class="stock-policy"><summary>提案数の計算について</summary><p>提案数は暫定で「定数 − 今回在庫（最小0）」です。入荷・返品・移動が未記録のため、在庫差は販売数とは異なります。</p></details>
+        <details class="stock-policy"><summary>発注数の計算について</summary><p>発注数は「定数 − 今回在庫（最小0）」で自動計算します。来週に回す商品は0にするなど、数量を変更できます。</p></details>
         <div style="overflow:auto"><table><thead><tr><th>商品名</th><th>定数</th><th>前回</th><th>今回</th><th>発注数</th><th>確認事項</th></tr></thead><tbody id="cc-stock-rows"></tbody></table></div>
+        <button id="cc-stock-recalculate" class="secondary" onclick="recalculateCCStock()">定数から再計算</button>
         <p id="cc-stock-total" style="margin:18px 0;font-weight:700"></p>
+        <button id="cc-stock-reopen" class="secondary hidden" onclick="reopenCCStock()">発注数を再編集</button>
         <button id="cc-stock-create" onclick="createStockOrders()">この内容で承認待ちに登録</button>
         <div id="cc-stock-action-message" class="msg hidden" role="status" aria-live="polite"></div>
         <p style="margin-top:12px;color:#173e63">発注数が1以上の商品だけを登録します。メーカーへの送信は承認管理で行います。</p>
@@ -1538,6 +1550,7 @@ function ccRun_(options) {
         <label>所属店舗</label>
         <input type="text" id="cu-store" placeholder="例: デモ店舗" autocomplete="off">
       </div>
+      <div class="field"><label for="cu-store-code">店舗コード（任意）</label><input type="text" inputmode="numeric" maxlength="20" id="cu-store-code" placeholder="例: 001"><small>同じ店舗のユーザーで共通の番号です。</small></div>
     </div>
     <div class="modal-footer">
       <button class="secondary" onclick="closeCreateUser()" id="cu-cancel-btn">キャンセル</button>
@@ -1567,6 +1580,7 @@ function ccRun_(options) {
         <label>所属店舗</label>
         <input type="text" id="eu-store" placeholder="例: デモ店舗" autocomplete="off">
       </div>
+      <div class="field"><label for="eu-store-code">店舗コード（任意）</label><input type="text" inputmode="numeric" maxlength="20" id="eu-store-code" placeholder="例: 001"><small>同じ店舗のユーザーで共通の番号です。</small></div>
       <div class="field">
         <label>権限</label>
         <select id="eu-role">
@@ -1922,7 +1936,7 @@ function ccRun_(options) {
     document.getElementById('help-search-input').focus();
   }
 
-  function switchView(view) {
+  function switchView(view, skipLoad) {
     CURRENT_VIEW = view;
     ['stock','dashboard','orders','approval','master','issue','suppliers','users','sales','storecomp','analytics'].forEach(function(v) {
       var el = document.getElementById('view-' + v);
@@ -1935,6 +1949,7 @@ function ccRun_(options) {
     var titles = { stock: '在庫報告', dashboard: 'ホーム', orders: '受注一覧', approval: '承認管理', master: 'AZコード検索', issue: '新規AZコード発行', suppliers: '取引先管理', users: 'ユーザー管理', sales: '商品別売上', storecomp: '店舗比較ダッシュボード', analytics: '売上分析' };
     document.getElementById('view-title').textContent = titles[view] || '';
 
+    if(skipLoad)return;
     // 各ビューの初期読み込み
     if (view === 'stock') loadStockReports();
     if (view === 'dashboard') loadDashboard();
@@ -4802,6 +4817,7 @@ function ccRun_(options) {
     document.getElementById('cu-password').value = '';
     document.getElementById('cu-role').value = 'operator';
     document.getElementById('cu-store').value = '';
+    document.getElementById('cu-store-code').value = '';
     document.getElementById('create-user-msg').classList.add('hidden');
     var btn = document.getElementById('cu-confirm-btn');
     btn.disabled = false; btn.textContent = '作成';
@@ -4852,13 +4868,13 @@ function ccRun_(options) {
         showCuMsg('エラー: ' + err.message, 'error');
         btn.disabled = false; btn.textContent = '作成';
       })
-      .webAdminCreateUser(AUTH_TOKEN, { email: email, name: name, password: password, role: role, store: store });
+      .webAdminCreateUser(AUTH_TOKEN, { email: email, name: name, password: password, role: role, store: store, storeCode: document.getElementById('cu-store-code').value.trim() });
   }
 
   function renderUsers() {
     var tbody = document.querySelector('#users-table tbody');
     if (USERS_CACHE.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">ユーザーがいません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="empty">ユーザーがいません</td></tr>';
       return;
     }
     tbody.innerHTML = USERS_CACHE.map(function(u) {
@@ -4875,13 +4891,14 @@ function ccRun_(options) {
           '<button class="secondary btn-sm" onclick="enableUserConfirm(' + jsArg(u.email) + ')">有効化</button>';
       } else {
         actions =
-          '<button class="secondary btn-sm" onclick="openEditUser(' + jsArg(u.email) + ',' + jsArg(u.name) + ',' + jsArg(u.store) + ',' + jsArg(u.role) + ')">編集</button> ' +
+          '<button class="secondary btn-sm" onclick="openEditUser(' + jsArg(u.email) + ',' + jsArg(u.name) + ',' + jsArg(u.store) + ',' + jsArg(u.role) + ',' + jsArg(u.storeCode || '') + ')">編集</button> ' +
           '<button class="danger btn-sm" onclick="disableUserConfirm(' + jsArg(u.email) + ')">無効化</button>';
       }
       return '<tr>' +
         '<td>' + escapeHtml(u.email) + (isMe ? ' <span style="color:#173e63;font-size:13px; font-weight:700;">(あなた)</span>' : '') + '</td>' +
         '<td>' + escapeHtml(u.name) + '</td>' +
         '<td>' + escapeHtml(u.store || '-') + '</td>' +
+        '<td>' + escapeHtml(u.storeCode || '—') + '</td>' +
         '<td>' + roleBadge(u.role) + '</td>' +
         '<td>' + statusUserBadge(u.status) + '</td>' +
         '<td>' + escapeHtml(u.lastLoginAt || '-') + '</td>' +
@@ -4921,10 +4938,11 @@ function ccRun_(options) {
       .webAdminEnableUser(AUTH_TOKEN, email);
   }
 
-  function openEditUser(email, name, store, role) {
+  function openEditUser(email, name, store, role, storeCode) {
     document.getElementById('eu-email').value = email;
     document.getElementById('eu-name').value = name;
     document.getElementById('eu-store').value = store;
+    document.getElementById('eu-store-code').value = storeCode || '';
     document.getElementById('eu-role').value = role;
     document.getElementById('eu-password').value = '';
     document.getElementById('edit-user-msg').classList.add('hidden');
@@ -4954,7 +4972,7 @@ function ccRun_(options) {
       return;
     }
 
-    var updates = { name: name, store: store, role: role };
+    var updates = { name: name, store: store, role: role, storeCode: document.getElementById('eu-store-code').value.trim() };
     if (password) updates.password = password;
 
     var btn = document.getElementById('eu-confirm-btn');
@@ -5638,6 +5656,7 @@ function ccRun_(options) {
       html += '</div>';
       // この受付単位で承認/差し戻し
       html += '<div style="display:flex; gap:8px;">';
+      if(batch.stockReportId)html += '<button class="secondary" onclick="editStockFromApproval(' + jsArg(batch.stockReportId) + ',' + jsArg(batch.stockSupplierCode) + ')">発注数を再編集</button>';
       html += '<button onclick="printApprovalList(' + jsArg(batch.batchId) + ')" style="padding:7px 12px; font-size:13px; color:#173e63; border:1px solid #173e63; background:white; border-radius:6px; cursor:pointer;" title="チェックした明細だけ印刷（未選択ならこの受付を全件）">印刷</button>';
       html += '<button onclick="rejectBatch(' + jsArg(batch.batchId) + ')" style="padding:7px 14px; font-size:13px; color:#173e63; border:1px solid #173e63; background:white; border-radius:6px; cursor:pointer;">差し戻す</button>';
       html += '<button onclick="openApprovalSendPreview(' + jsArg(batch.batchId) + ')" style="padding:7px 16px; font-size:13px; font-weight:bold; background:#173e63; border:none; color:white; border-radius:6px; cursor:pointer;">承認して送信</button>';
@@ -5657,6 +5676,7 @@ function ccRun_(options) {
         html += '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
         html += '<tr style="background:#ffffff;">' +
           '<th style="padding:8px 10px; text-align:center; width:34px;"><input type="checkbox" class="approval-maker-select-all" onclick="toggleMakerSelect(this)" title="このメーカーの明細をすべて選択／解除"></th>' +
+          '<th style="padding:8px 12px; text-align:left;">店舗コード</th>' +
           '<th style="padding:8px 12px; text-align:left;">クラス</th>' +
           '<th style="padding:8px 12px; text-align:left;">取引条件</th>' +
           '<th style="padding:8px 12px; text-align:left;">仕入先コード</th>' +
@@ -5681,6 +5701,7 @@ function ccRun_(options) {
           // 編集用の元値はバッジ混入を避けるため data属性に保持
           html += '<tr id="approval-row-' + rn + '" data-oid="' + escapeHtml(it.orderId || '') + '" data-az="' + escapeHtml(it.azCode || '') + '" data-name="' + escapeHtml(it.productName || '') + '" data-qty="' + (Number(it.quantity) || 0) + '" data-retail="' + (Number(it.unitRetail) || 0) + '">';
           html += '<td style="padding:8px 10px; text-align:center;"><input type="checkbox" class="approval-select" data-row="' + rn + '" data-batch="' + bId + '" title="印刷対象に含める" onclick="syncMakerHeaderCheckboxes_()"></td>';
+          html += '<td class="approval-cell-storeCode" style="padding:8px 12px;">' + escapeHtml(it.storeCode || '—') + '</td>';
           html += '<td style="padding:8px 12px; color:#173e63;">' + (it.productClass ? escapeHtml(it.productClass) : dash) + '</td>';
           html += '<td style="padding:8px 12px; font-weight:600; color:#173e63;">' + (it.dealCondition ? escapeHtml(it.dealCondition) : dash) + '</td>';
           html += '<td style="padding:8px 12px; color:#173e63;">' + (it.supplierCode ? escapeHtml(it.supplierCode) : dash) + '</td>';
@@ -6028,7 +6049,17 @@ function ccRun_(options) {
 
 <script>
 var ccStockReports=[], ccStockDetail=null, ccStockBusy=false, ccStockLoadId=0;
-var ccStockLoading=false, ccStockDirty=false;
+var ccStockLoading=false, ccStockDirty=false, ccStockFolderState={};
+function stockReadIndicator_(label){document.getElementById('cc-stock-loader-text').textContent=label;return document.getElementById('cc-stock-loader');}
+function renderStockFolders_(){
+  var dates={};ccStockReports.forEach(function(r,i){(dates[r.date]||(dates[r.date]=[])).push({r:r,i:i});});
+  var keys=Object.keys(dates).sort().reverse();
+  document.getElementById('cc-stock-list').innerHTML=keys.map(function(date,n){
+    var opened=Object.prototype.hasOwnProperty.call(ccStockFolderState,date)?ccStockFolderState[date]:n===0;
+    return '<details class="stock-date-folder" data-date="'+escapeHtml(date)+'" '+(opened?'open':'')+' ontoggle="ccStockFolderState[this.dataset.date]=this.open"><summary>'+escapeHtml(date)+'<span>'+dates[date].length+' 枚</span></summary><div style="overflow:auto"><table><thead><tr><th>店舗</th><th>メーカー</th><th>入力</th><th>状態</th><th></th></tr></thead><tbody>'+dates[date].map(function(item){var r=item.r;return '<tr><td>'+escapeHtml(r.store)+'</td><td>'+escapeHtml(r.supplierName)+'</td><td>'+r.saved+' / '+r.total+'</td><td>'+escapeHtml(r.status==='発注済み'?'CC確認済み':r.status)+'</td><td><button class="secondary" onclick="openCCStock('+item.i+')">確認する</button></td></tr>';}).join('')+'</tbody></table></div></details>';
+  }).join('');
+}
+
 function loadStockReports(background) {
   if(ccStockBusy || ccStockLoading)return;
   if(!background && ccStockDirty && !window.confirm('変更中の発注数を破棄して一覧へ戻りますか？'))return;
@@ -6036,7 +6067,7 @@ function loadStockReports(background) {
   var seq=++ccStockLoadId;
   document.getElementById('cc-stock-detail').classList.add('hidden');
   if(!background)document.getElementById('cc-stock-message').textContent='在庫報告を読み込み中…';
-  ccRun_({indicator:document.getElementById('cc-stock-message'),quiet:!!background}).withSuccessHandler(function(res){
+  ccRun_({indicator:background?document.getElementById('cc-stock-message'):stockReadIndicator_('在庫報告を読み込み中…'),quiet:!!background}).withSuccessHandler(function(res){
     ccStockLoading=false;
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
@@ -6044,7 +6075,7 @@ function loadStockReports(background) {
     document.getElementById('cc-stock-sync').textContent='最終確認 '+new Date().toLocaleTimeString('ja-JP')+' · 一覧表示中は30秒ごとに更新';
     var pending=res.reports.filter(function(r){return r.status==='報告済み'||r.status==='発注処理中';}).length;
     document.getElementById('cc-stock-message').textContent=res.reports.length?'CC確認待ち '+pending+' 枚 ／ 全 '+res.reports.length+' 枚':'在庫報告はまだありません。店舗で保存すると、ここに表示されます。';
-    document.getElementById('cc-stock-list').innerHTML='<table><thead><tr><th>棚卸日</th><th>店舗</th><th>メーカー</th><th>入力</th><th>状態</th><th></th></tr></thead><tbody>'+res.reports.map(function(r,i){return '<tr><td>'+escapeHtml(r.date)+'</td><td>'+escapeHtml(r.store)+'</td><td>'+escapeHtml(r.supplierName)+'</td><td>'+r.saved+' / '+r.total+'</td><td>'+escapeHtml(r.status)+'</td><td><button class="secondary" onclick="openCCStock('+i+')">確認する</button></td></tr>';}).join('')+'</tbody></table>';
+    renderStockFolders_();
   }).withFailureHandler(function(){ccStockLoading=false;if(seq===ccStockLoadId)document.getElementById('cc-stock-message').textContent='通信に失敗しました。一覧を更新してください。';}).webGetStockReports(AUTH_TOKEN);
 }
 function openCCStock(index) {
@@ -6054,7 +6085,7 @@ function openCCStock(index) {
   ccStockLoading=true;
   document.getElementById('cc-stock-detail').classList.add('hidden');
   document.getElementById('cc-stock-message').textContent='在庫報告を開いています…';
-  ccRun_({indicator:document.getElementById('cc-stock-message')}).withSuccessHandler(function(res){
+  ccRun_({indicator:stockReadIndicator_('用紙を読み込み中…')}).withSuccessHandler(function(res){
     ccStockLoading=false;
     if(seq!==ccStockLoadId)return;
     if(!res.success){document.getElementById('cc-stock-message').textContent=res.error;return;}
@@ -6063,24 +6094,50 @@ function openCCStock(index) {
 }
 function renderCCStock() {
   var d=ccStockDetail,editable=d.status==='報告済み';
+  document.getElementById('cc-stock-recalculate').classList.toggle('hidden',!editable);
   document.getElementById('cc-stock-title').textContent=d.store+' ／ '+d.supplierName;
-  document.getElementById('cc-stock-context').textContent=d.date+' の在庫報告 · '+d.status;
+  document.getElementById('cc-stock-context').textContent=d.date+' の在庫報告 · '+(d.status==='発注済み'?'CC確認済み':d.status);
   document.getElementById('cc-stock-rows').innerHTML=d.rows.map(function(r,i){
     var notes=[];
     if(r.stock!=='' && Number(r.stock)<=1)notes.push('残り'+r.stock);
     if(r.previous!=='' && r.stock!=='' && Number(r.previous)===Number(r.stock))notes.push('前回と同数');
     if(r.orderWarning)notes.push(r.orderWarning);
-    var qty=r.orderQty===''||r.orderQty==null?(r.orderWarning?0:r.suggestedQty):r.orderQty;
+    var qty=r.orderQty===''||r.orderQty==null?Math.max(0,Number(r.teisu)-Number(r.stock)):r.orderQty;
     return '<tr><td>'+escapeHtml(r.productName)+'<small class="stock-code">'+escapeHtml(r.azCode)+'</small></td><td>'+escapeHtml(r.teisu)+'</td><td>'+escapeHtml(r.previous===''?'—':r.previous)+'</td><td>'+escapeHtml(r.stock===''?'未入力':r.stock)+'</td><td><input class="stock-order-input" id="cc-stock-qty-'+i+'" type="number" inputmode="numeric" min="0" max="99999" step="1" aria-label="'+escapeHtml(r.productName)+'の発注数" value="'+escapeHtml(qty)+'" '+(!editable?'disabled':'')+' oninput="ccStockDirty=true;updateCCStockTotal()"></td><td>'+escapeHtml(notes.join(' ／ '))+'</td></tr>';
   }).join('');
   var btn=document.getElementById('cc-stock-create');
+  document.getElementById('cc-stock-reopen').classList.toggle('hidden',d.status!=='発注済み');
   var hasOrders=d.rows.some(function(r){return Number(r.orderQty)>0;});
   btn.classList.toggle('hidden',d.status!=='報告済み' && d.status!=='発注処理中' && !(d.status==='発注済み' && hasOrders));
   btn.disabled=false;
   btn.textContent=d.status==='発注処理中'?'保存済みの発注数で起票を再開':d.status==='発注済み'?'承認管理を開く':'この内容で承認待ちに登録';
   if(d.status==='入力中')setCCStockActionMessage('店舗からの提出待ちです。','info');
-  else if(d.status==='発注済み')setCCStockActionMessage(hasOrders?'この用紙は登録済みです。':'発注対象0件として確認済みです。','success');
+  else if(d.status==='発注済み')setCCStockActionMessage(hasOrders?'承認待ちへの登録済みです。送信前は発注数を再編集できます。':'発注対象0件として確認済みです。','success');
   document.getElementById('cc-stock-detail').classList.remove('hidden'); updateCCStockTotal();
+}
+async function reopenCCStock(){
+  if(ccStockBusy||ccStockLoading||!ccStockDetail)return;
+  if(!(await confirmDialog_('承認待ちへの登録を取り下げて発注数を再編集します。よろしいですか？')))return;
+  var d=ccStockDetail;ccStockBusy=true;
+  ccRun_({indicator:stockReadIndicator_('発注数の編集を準備中…')}).withSuccessHandler(function(res){
+    ccStockBusy=false;
+    if(!res||!res.success){setCCStockActionMessage((res&&res.error)||'再編集できませんでした。','error');return;}
+    ccStockDetail=res;ccStockDirty=false;renderCCStock();setCCStockActionMessage('発注数を変更して、承認待ちに登録してください。','info');
+  }).withFailureHandler(function(){ccStockBusy=false;setCCStockActionMessage('通信が途切れました。一覧を更新して状態を確認してください。','error');}).webReopenStockOrders(AUTH_TOKEN,d.reportId,d.supplierCode,d.revision);
+}
+function editStockFromApproval(reportId,supplier){
+  if(ccStockBusy||ccStockLoading)return;
+  ccStockLoading=true;
+  ccRun_({indicator:stockReadIndicator_('在庫報告を読み込み中…')}).withSuccessHandler(function(res){
+    ccStockLoading=false;if(!res||!res.success){alert((res&&res.error)||'読み込みに失敗しました');return;}
+    switchView('stock',true);
+    ccStockDetail=res;ccStockDirty=false;renderCCStock();reopenCCStock();
+  }).withFailureHandler(function(){ccStockLoading=false;alert('読み込みに失敗しました。もう一度お試しください。');}).webGetStockReport(AUTH_TOKEN,reportId,supplier);
+}
+function recalculateCCStock(){
+  if(ccStockBusy||!ccStockDetail||ccStockDetail.status!=='報告済み')return;
+  ccStockDetail.rows.forEach(function(r,i){document.getElementById('cc-stock-qty-'+i).value=r.stock===''?0:Math.max(0,Number(r.teisu)-Number(r.stock));});
+  ccStockDirty=true;updateCCStockTotal();
 }
 function ccStockQuantities(){return ccStockDetail.rows.map(function(r,i){return {azCode:r.azCode,quantity:document.getElementById('cc-stock-qty-'+i).value};});}
 function updateCCStockTotal(){var q=ccStockQuantities();document.getElementById('cc-stock-total').textContent='発注対象 '+q.filter(function(r){return Number(r.quantity)>0;}).length+' 品目 ／ 合計 '+q.reduce(function(n,r){return n+(Number(r.quantity)||0);},0)+' 個';}
@@ -6101,7 +6158,7 @@ function createStockOrders() {
     finished=true;clearTimeout(timer);ccStockBusy=false;ccStockDirty=false;
     var decided=res.quantities||[];
     d.rows.forEach(function(r){var hit=decided.find(function(v){return v.azCode===r.azCode;});if(hit)r.orderQty=Number(hit.quantity);});
-    d.status='発注済み';renderCCStock();
+    d.status='発注済み';if(res.revision)d.revision=res.revision;renderCCStock();
     var count=decided.filter(function(v){return Number(v.quantity)>0;}).length;
     if(count){
       var notice=document.getElementById('approval-stock-result');

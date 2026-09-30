@@ -536,7 +536,7 @@ else if(name==='webGetStockReports')res={success:true,reports:Object.values(JSON
 else if(name==='webGetStockReport')res=demoRead(a[1].substring(5));
 else if(name==='webReopenStockOrders'){var d=demoRead(a[1].substring(5));d.status='報告済み';d.revision=String(Date.now());demoWrite(d);res=d;}
 else if(name==='webCreateOrdersFromStock'){var d=demoRead(a[1].substring(5));d.rows.forEach(function(r,i){r.orderQty=Number(a[3][i].quantity);});d.status='発注済み';demoWrite(d);res={success:true,itemCount:d.rows.filter(function(r){return r.orderQty>0;}).length,quantities:a[3]};if(window.__stockLoseCreateResponse){window.__stockLoseCreateResponse=false;return;}}
-else if(name==='webGetPendingApprovals'){if(window.__approvalFailRead)throw Error('offline');var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var rowNum=2;var batches=ordered.map(function(d){var items=d.rows.map(function(r,i){return {rowNum:rowNum++,orderId:'DEMO-'+d.date+'-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,storeCode:'001',productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};}).filter(function(r){return r.quantity>0;});return {stockReportId:d.reportId,stockSupplierCode:d.supplierCode,batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
+else if(name==='webGetPendingApprovals'){if(window.__approvalFailRead)throw Error('offline');var ordered=Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).filter(function(d){return d.status==='発注済み';});var rowNum=2;var batches=ordered.map(function(d){var items=d.rows.map(function(r,i){return {rowNum:rowNum++,orderId:'DEMO-'+d.date+'-'+i,azCode:r.azCode,productName:r.productName,quantity:Number(r.orderQty),unitRetail:r.retailPrice,unitCost:null,supplierCode:d.supplierCode,deptStore:d.store,storeProductNo:'9001',productClass:'',dealCondition:'',productNo:r.productNo,teisu:r.teisu};}).filter(function(r){return r.quantity>0;});return {stockReportId:d.reportId,stockSupplierCode:d.supplierCode,batchId:'STOCK-STK-'+d.date+'-'+encodeURIComponent(d.store)+'-'+d.supplierCode,createdAt:d.date,makers:[{makerName:d.supplierName,makerCode:d.supplierCode,items:items,totalQty:items.reduce(function(n,r){return n+r.quantity;},0),totalRetail:items.reduce(function(n,r){return n+r.quantity*r.unitRetail;},0)}]};}).filter(function(b){return b.makers[0].items.length;});res={success:true,batches:batches,totalBatches:batches.length,totalItems:batches.reduce(function(n,b){return n+b.makers[0].items.length;},0),totalQty:batches.reduce(function(n,b){return n+b.makers[0].totalQty;},0),totalRetail:batches.reduce(function(n,b){return n+b.makers[0].totalRetail;},0)};}
 else if(name==='webUpdateApprovalItem'){if(window.__approvalFailUpdate)throw Error('offline');var found=false;Object.values(JSON.parse(localStorage.getItem(DEMO_KEY)||'{}')).forEach(function(d){d.rows.forEach(function(r,i){if('DEMO-'+d.date+'-'+i!==a[3])return;found=true;r.azCode=a[2].azCode;r.productName=a[2].productName;r.orderQty=Math.min(999,Math.max(1,Number(a[2].quantity)||1));r.retailPrice=Number(a[2].unitRetail);demoWrite(d);});});res=found?{success:true}:{success:false,error:'対象が見つかりません'};}
 else if(name==='webGetApprovalSummary')res={success:true,makers:[],totalItems:0};
 else if(name==='webGetApprovalDetail')res={success:true,items:[]};
@@ -1188,7 +1188,6 @@ function ccRun_(options) {
               <th>メール</th>
               <th>表示名</th>
               <th>店舗</th>
-              <th>店舗コード</th>
               <th>権限</th>
               <th>ステータス</th>
               <th>最終ログイン</th>
@@ -1550,7 +1549,6 @@ function ccRun_(options) {
         <label>所属店舗</label>
         <input type="text" id="cu-store" placeholder="例: デモ店舗" autocomplete="off">
       </div>
-      <div class="field"><label for="cu-store-code">店舗コード（任意）</label><input type="text" inputmode="numeric" maxlength="20" id="cu-store-code" placeholder="例: 001"><small>同じ店舗のユーザーで共通の番号です。</small></div>
     </div>
     <div class="modal-footer">
       <button class="secondary" onclick="closeCreateUser()" id="cu-cancel-btn">キャンセル</button>
@@ -1580,7 +1578,6 @@ function ccRun_(options) {
         <label>所属店舗</label>
         <input type="text" id="eu-store" placeholder="例: デモ店舗" autocomplete="off">
       </div>
-      <div class="field"><label for="eu-store-code">店舗コード（任意）</label><input type="text" inputmode="numeric" maxlength="20" id="eu-store-code" placeholder="例: 001"><small>同じ店舗のユーザーで共通の番号です。</small></div>
       <div class="field">
         <label>権限</label>
         <select id="eu-role">
@@ -4817,7 +4814,6 @@ function ccRun_(options) {
     document.getElementById('cu-password').value = '';
     document.getElementById('cu-role').value = 'operator';
     document.getElementById('cu-store').value = '';
-    document.getElementById('cu-store-code').value = '';
     document.getElementById('create-user-msg').classList.add('hidden');
     var btn = document.getElementById('cu-confirm-btn');
     btn.disabled = false; btn.textContent = '作成';
@@ -4868,13 +4864,13 @@ function ccRun_(options) {
         showCuMsg('エラー: ' + err.message, 'error');
         btn.disabled = false; btn.textContent = '作成';
       })
-      .webAdminCreateUser(AUTH_TOKEN, { email: email, name: name, password: password, role: role, store: store, storeCode: document.getElementById('cu-store-code').value.trim() });
+      .webAdminCreateUser(AUTH_TOKEN, { email: email, name: name, password: password, role: role, store: store });
   }
 
   function renderUsers() {
     var tbody = document.querySelector('#users-table tbody');
     if (USERS_CACHE.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9" class="empty">ユーザーがいません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">ユーザーがいません</td></tr>';
       return;
     }
     tbody.innerHTML = USERS_CACHE.map(function(u) {
@@ -4891,14 +4887,13 @@ function ccRun_(options) {
           '<button class="secondary btn-sm" onclick="enableUserConfirm(' + jsArg(u.email) + ')">有効化</button>';
       } else {
         actions =
-          '<button class="secondary btn-sm" onclick="openEditUser(' + jsArg(u.email) + ',' + jsArg(u.name) + ',' + jsArg(u.store) + ',' + jsArg(u.role) + ',' + jsArg(u.storeCode || '') + ')">編集</button> ' +
+          '<button class="secondary btn-sm" onclick="openEditUser(' + jsArg(u.email) + ',' + jsArg(u.name) + ',' + jsArg(u.store) + ',' + jsArg(u.role) + ')">編集</button> ' +
           '<button class="danger btn-sm" onclick="disableUserConfirm(' + jsArg(u.email) + ')">無効化</button>';
       }
       return '<tr>' +
         '<td>' + escapeHtml(u.email) + (isMe ? ' <span style="color:#173e63;font-size:13px; font-weight:700;">(あなた)</span>' : '') + '</td>' +
         '<td>' + escapeHtml(u.name) + '</td>' +
         '<td>' + escapeHtml(u.store || '-') + '</td>' +
-        '<td>' + escapeHtml(u.storeCode || '—') + '</td>' +
         '<td>' + roleBadge(u.role) + '</td>' +
         '<td>' + statusUserBadge(u.status) + '</td>' +
         '<td>' + escapeHtml(u.lastLoginAt || '-') + '</td>' +
@@ -4938,11 +4933,10 @@ function ccRun_(options) {
       .webAdminEnableUser(AUTH_TOKEN, email);
   }
 
-  function openEditUser(email, name, store, role, storeCode) {
+  function openEditUser(email, name, store, role) {
     document.getElementById('eu-email').value = email;
     document.getElementById('eu-name').value = name;
     document.getElementById('eu-store').value = store;
-    document.getElementById('eu-store-code').value = storeCode || '';
     document.getElementById('eu-role').value = role;
     document.getElementById('eu-password').value = '';
     document.getElementById('edit-user-msg').classList.add('hidden');
@@ -4972,7 +4966,7 @@ function ccRun_(options) {
       return;
     }
 
-    var updates = { name: name, store: store, role: role, storeCode: document.getElementById('eu-store-code').value.trim() };
+    var updates = { name: name, store: store, role: role };
     if (password) updates.password = password;
 
     var btn = document.getElementById('eu-confirm-btn');
@@ -5676,7 +5670,7 @@ function ccRun_(options) {
         html += '<table style="width:100%; border-collapse:collapse; font-size:14px;">';
         html += '<tr style="background:#ffffff;">' +
           '<th style="padding:8px 10px; text-align:center; width:34px;"><input type="checkbox" class="approval-maker-select-all" onclick="toggleMakerSelect(this)" title="このメーカーの明細をすべて選択／解除"></th>' +
-          '<th style="padding:8px 12px; text-align:left;">店舗コード</th>' +
+          '<th style="padding:8px 12px; text-align:left;">店舗別品番</th>' +
           '<th style="padding:8px 12px; text-align:left;">クラス</th>' +
           '<th style="padding:8px 12px; text-align:left;">取引条件</th>' +
           '<th style="padding:8px 12px; text-align:left;">仕入先コード</th>' +
@@ -5701,7 +5695,7 @@ function ccRun_(options) {
           // 編集用の元値はバッジ混入を避けるため data属性に保持
           html += '<tr id="approval-row-' + rn + '" data-oid="' + escapeHtml(it.orderId || '') + '" data-az="' + escapeHtml(it.azCode || '') + '" data-name="' + escapeHtml(it.productName || '') + '" data-qty="' + (Number(it.quantity) || 0) + '" data-retail="' + (Number(it.unitRetail) || 0) + '">';
           html += '<td style="padding:8px 10px; text-align:center;"><input type="checkbox" class="approval-select" data-row="' + rn + '" data-batch="' + bId + '" title="印刷対象に含める" onclick="syncMakerHeaderCheckboxes_()"></td>';
-          html += '<td class="approval-cell-storeCode" style="padding:8px 12px;">' + escapeHtml(it.storeCode || '—') + '</td>';
+          html += '<td class="approval-cell-storeProductNo" style="padding:8px 12px;">' + escapeHtml(it.storeProductNo || '—') + '</td>';
           html += '<td style="padding:8px 12px; color:#173e63;">' + (it.productClass ? escapeHtml(it.productClass) : dash) + '</td>';
           html += '<td style="padding:8px 12px; font-weight:600; color:#173e63;">' + (it.dealCondition ? escapeHtml(it.dealCondition) : dash) + '</td>';
           html += '<td style="padding:8px 12px; color:#173e63;">' + (it.supplierCode ? escapeHtml(it.supplierCode) : dash) + '</td>';
